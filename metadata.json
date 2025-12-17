@@ -1,0 +1,7 @@
+{
+  "name": "ShopGreenProject",
+  "description": "A web app to find and promote eco-sustainable businesses in Trento.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
