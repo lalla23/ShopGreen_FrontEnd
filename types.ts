@@ -62,14 +62,13 @@ export interface Zone {
 export interface Seller {
   id: string;
   username: string;
-  zoneIds: string[]; // Changed to array for multiple zones
+  zoneIds: string[]; 
   categories: string[]; 
-  platformLinks: { name: string; url: string }[];
+  platformLinks: string[];
   avatarUrl: string;
   bio?: string; 
 }
 
-// Notifications Types
 export enum NotificationType {
   SYSTEM = 'SYSTEM', // Generic info
   PROMO = 'PROMO',   // For Users: Offers
