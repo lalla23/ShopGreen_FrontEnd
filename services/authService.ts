@@ -48,6 +48,9 @@ export const login = async (body: {}, google = false): Promise<UserData> => { //
        throw new Error(data.message || 'Login failed from server');
     }
 
+    //per debugging
+    console.log("TOKEN RICEVUTO DAL SERVER:", data.token);
+    
     localStorage.setItem('token', data.token); //salvo il token nella memoria del browser per tenerlo anche nella altre pagine
 
     return {

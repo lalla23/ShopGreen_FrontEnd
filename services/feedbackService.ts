@@ -1,18 +1,14 @@
+import {UserVote, VoteStats} from '../types';
 const API_URL = 'http://localhost:3000/api/feedback';
 
-export interface Feedback {
-  _id: string;
-  autore: string;
-  negozio: string;
-  feedback: boolean;
-}
+const mapFeedback = (dbItem: any): UserVote => {
+  return {
+    id: dbItem._id,
+    isPositive: dbItem.feedback
+  };
+};
 
-export interface FeedbackResponse {
-  successo: boolean; 
-  feedback: Feedback[];
-}
-
-export const getFeedback = async (negozio_id: string): Promise<FeedbackResponse | null> => {
+export const getFeedback = async (negozio_id: string): Promise<UserVote | null> => {
   try {
     let url = API_URL + '?negozio_id=' + negozio_id;
     const token = localStorage.getItem('token');
@@ -38,7 +34,12 @@ export const getFeedback = async (negozio_id: string): Promise<FeedbackResponse 
        const erroreServer = await response.json();
        throw new Error(erroreServer.dettagli)
     }
-    return await response.json();
+    const votoBackend = await response.json();
+
+    if (votoBackend.feedback && votoBackend.feedback.length > 0) {
+        return mapFeedback(votoBackend.feedback[0]);
+    }
+    return null;
   }
   catch (error){
     console.error("Errore nella visualizzazione del feedback", error);
@@ -46,7 +47,7 @@ export const getFeedback = async (negozio_id: string): Promise<FeedbackResponse 
   }
 };
 
-export const sendFeedback = async (negozio_id: string, voto: boolean): Promise<any> => {
+export const sendFeedback = async (negozio_id: string, voto: boolean): Promise<VoteStats> => {
   try {
     let url = API_URL;
     const token = localStorage.getItem('token');
@@ -75,7 +76,12 @@ export const sendFeedback = async (negozio_id: string, voto: boolean): Promise<a
        }
        throw new Error(erroreServer.dettagli)
     }
-    return await response.json();
+    const rispostaBackend = await response.json();
+    return {
+        success: rispostaBackend.success,
+        positiveCount: rispostaBackend.positive,
+        negativeCount: rispostaBackend.negative  
+    };
   }
   catch (error){
     console.error("Errore nell'invio del feedback", error);

@@ -1,4 +1,3 @@
-
 export enum UserRole {
   ANONYMOUS = 'anonimo',
   USER = 'utente',
@@ -7,11 +6,10 @@ export enum UserRole {
 }
 
 export enum ShopCategory {
-  ALL = 'Tutte',
-  CLOTHING = 'Vestiti',
-  FOOD = 'Cibo',
-  HOME_CARE = 'Cura della casa e della persona',
-  OTHER = 'Altro'
+  CLOTHING = 'vestiario',
+  FOOD = 'alimenti',
+  HOME_CARE = 'cura della casa e della persona',
+  OTHER = 'altro'
 }
 
 export enum ShopStatus {
@@ -36,12 +34,13 @@ export interface Review {
 export interface Shop {
   id: string;
   name: string;
-  category: ShopCategory;
+  categories: ShopCategory[];
   status: ShopStatus;
   coordinates: Coordinates;
   address: string;
   description: string;
   hours: string;
+  rawHours?: any;
   imageUrl?: string; // New field for popup header
   website?: string;
   googleMapsLink?: string; 
@@ -89,4 +88,15 @@ export interface Notification {
   shopName?: string; // For Reports
   licenseId?: string; // For Reports (Operator check)
   reporterId?: string; // The username/ID of the user who submitted the report
+}
+
+export interface UserVote {
+  id: string;
+  isPositive: boolean;
+}
+
+export interface VoteStats {
+  success: boolean;
+  positiveCount: number;
+  negativeCount: number;
 }

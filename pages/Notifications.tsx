@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+//versione che utilizza i mock
+
+/**import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_NOTIFICATIONS } from '../constants';
 import { Notification, NotificationType, UserRole } from '../types';
@@ -54,7 +56,7 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8 h-[calc(100vh-64px)] flex flex-col md:flex-row gap-6">
       
-      {/* LEFT COLUMN: Notification List */}
+      {}
       <div className={`w-full md:w-1/3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col ${selectedId ? 'hidden md:flex' : 'flex'}`}>
          <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-between items-center">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -101,12 +103,12 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
          </div>
       </div>
 
-      {/* RIGHT COLUMN: Detail View */}
+      {}
       <div className={`w-full md:w-2/3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col ${!selectedId ? 'hidden md:flex' : 'flex'}`}>
          
          {selectedNotification ? (
             <>
-              {/* Detail Header with Back Button (Mobile) */}
+              {}
               <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 md:hidden">
                  <button onClick={() => setSelectedId(null)} className="p-2 hover:bg-gray-100 rounded-full">
                     <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -116,7 +118,7 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
 
               <div className="flex-1 overflow-y-auto p-6 md:p-10 animate-in fade-in slide-in-from-bottom-4 duration-300">
                  
-                 {/* Type Badge */}
+                 {}
                  <div className="mb-6 flex items-center justify-between">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2
                       ${selectedNotification.type === NotificationType.PROMO ? 'bg-purple-100 text-purple-700' : 
@@ -134,14 +136,14 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
                     {selectedNotification.title}
                  </h1>
 
-                 {/* PROMO SPECIFIC: Image */}
+                 {}
                  {selectedNotification.type === NotificationType.PROMO && selectedNotification.imageUrl && (
                     <div className="mb-8 rounded-2xl overflow-hidden shadow-lg border border-gray-100 h-64 w-full">
                        <img src={selectedNotification.imageUrl} alt="Promo" className="w-full h-full object-cover" />
                     </div>
                  )}
 
-                 {/* REPORT SPECIFIC: Shop Details Box */}
+                 {}
                  {selectedNotification.type === NotificationType.REPORT && (
                     <div className="bg-orange-50 border border-orange-100 rounded-xl p-6 mb-8">
                        <h3 className="text-orange-900 font-bold mb-4 flex items-center gap-2">
@@ -170,17 +172,17 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
                     {selectedNotification.fullDescription}
                  </div>
 
-                 {/* ACTION BUTTONS */}
+                 {}
                  <div className="mt-10 pt-8 border-t border-gray-100 dark:border-gray-700">
                     
-                    {/* Actions for User (Promo) */}
+                    {}
                     {selectedNotification.type === NotificationType.PROMO && (
                        <button className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition-transform hover:scale-105 flex items-center justify-center gap-2">
                           <Ticket className="w-5 h-5" /> Usa Coupon in Negozio
                        </button>
                     )}
 
-                    {/* Actions for Operator (Report) */}
+                    {}
                     {selectedNotification.type === NotificationType.REPORT && (
                        <div className="flex flex-col md:flex-row gap-4">
                           <button 
@@ -208,6 +210,248 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
             </div>
          )}
       </div>
+    </div>
+  );
+};
+
+export default Notifications;**/
+
+//versione che utilizza i services e si collega al backend
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Notification, NotificationType, UserRole, Shop } from '../types';
+import { Bell, CheckCircle, Info, Ticket, FileText, XCircle, ArrowLeft, Loader2, Store } from 'lucide-react';
+
+// Servizi
+import { getNotifications } from '../services/notificheService';
+import { updateNegozio, deleteNegozio, getNegozioById } from '../services/negoziService';
+
+// Importiamo il Modale di Modifica (che useremo per approvare/correggere)
+import EditShopModal from '../components/EditShopModal';
+
+interface NotificationsProps {
+  userRole: UserRole;
+}
+
+const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [localNotifications, setLocalNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Stato per il Modale di Modifica/Approvazione
+  const [shopToApprove, setShopToApprove] = useState<Shop | null>(null);
+
+  const navigate = useNavigate();
+
+  // 1. CARICAMENTO (Scarica i negozi non verificati)
+  const refreshNotifications = async () => {
+        setIsLoading(true);
+        const data = await getNotifications();
+        setLocalNotifications(data);
+        setIsLoading(false);
+  };
+
+  useEffect(() => {
+    refreshNotifications();
+  }, []);
+
+  // Filter logic
+  const filteredNotifications = localNotifications.filter(n => {
+    if (n.type === NotificationType.SYSTEM) return true;
+    if (userRole === UserRole.OPERATOR) return n.type === NotificationType.REPORT;
+    return n.type === NotificationType.PROMO; 
+  });
+
+  const selectedNotification = filteredNotifications.find(n => n.id === selectedId);
+
+  // LOGICA AZIONI OPERATORE
+  
+  // A. APRI IL FORM MODIFICABILE (APPROVAZIONE)
+  const handleOpenApproveModal = async (notification: Notification) => {
+      try {
+          // Recuperiamo l'oggetto Shop completo usando l'ID della notifica (che è l'ID del negozio)
+          const fullShop = await getNegozioById(notification.id);
+          setShopToApprove(fullShop); 
+      } catch (error) {
+          alert("Errore nel recupero dei dati del negozio.");
+      }
+  };
+
+  // B. QUANDO L'OPERATORE SALVA IL FORM (CONFERMA)
+  const handleShopApproved = async (updatedShop: Shop) => {
+      try {
+          // 1. Aggiorniamo i dati (nel caso l'operatore abbia corretto nome/via)
+          // 2. IMPORTANTE: Forziamo lo stato a VERIFICATO (o OPEN) per farlo apparire nella mappa a tutti
+          const payload = {
+              ...updatedShop, // I dati modificati dal form
+              verificatoDaOperatore: true // LA CHIAVE MAGICA
+          };
+          
+          // Nota: updateNegozio nel service dovrà gestire questo payload
+          // Dovrai assicurarti che updateNegozio mappi correttamente il payload per il backend
+           // Per ora assumiamo che updateNegozio in Home gestisca il mapping
+           // Qui usiamo una logica simile a Home.tsx handleUpdateShop
+           
+           // Hack rapido: chiamiamo il backend direttamente o usiamo il service
+           // Se updateNegozio accetta 'any', passiamo il payload backend-friendly
+           const backendPayload = {
+                nome: updatedShop.name,
+                licenzaOppureFoto: updatedShop.imageUrl,
+                categoria: updatedShop.categories, // Array
+                coordinate: [updatedShop.coordinates.lat, updatedShop.coordinates.lng],
+                verificatoDaOperatore: true // APPROVAZIONE!
+           };
+           
+           await updateNegozio(updatedShop.id, backendPayload);
+
+          alert("Negozio verificato!");
+          setShopToApprove(null); // Chiudi modale
+          refreshNotifications(); // Ricarica lista (il negozio sparirà da qui e andrà in mappa)
+          
+      } catch (error) {
+          console.error(error);
+          alert("Errore durante l'approvazione");
+      }
+  };
+
+  // C. RESPINGI (CANCELLA IL NEGOZIO)
+  const handleReject = async (id: string) => {
+      if(!window.confirm("Sei sicuro di voler respingere questa segnalazione?")) return;
+      
+      try {
+          await deleteNegozio(id);
+          alert("Segnalazione respinta e cancellata");
+          setSelectedId(null);
+          refreshNotifications();
+      } catch (error) {
+          alert("Errore durante la cancellazione");
+      }
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto p-4 md:p-8 h-[calc(100vh-64px)] flex flex-col md:flex-row gap-6">
+      
+      {/* ... (COLONNA SINISTRA IDENTICA A PRIMA) ... */}
+       <div className={`w-full md:w-1/3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col ${selectedId ? 'hidden md:flex' : 'flex'}`}>
+         {/* ... Header e Lista ... */}
+         {/* Usa il codice della risposta precedente per la lista, è perfetto */}
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-between items-center">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+               <Bell className="w-5 h-5 text-green-600" /> 
+               {userRole === UserRole.OPERATOR ? 'Negozi da Approvare' : 'Notifiche'}
+            </h2>
+         </div>
+         <div className="overflow-y-auto flex-1 p-2 space-y-2 relative">
+            {isLoading && (
+                <div className="absolute inset-0 bg-white/80 z-10 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+                </div>
+            )}
+            {!isLoading && filteredNotifications.length === 0 ? (
+               <div className="text-center py-10 text-gray-400">Tutto pulito! Nessuna notifica.</div>
+            ) : (
+               filteredNotifications.map(notification => (
+                 <button
+                   key={notification.id}
+                   onClick={() => setSelectedId(notification.id)}
+                   className={`w-full text-left p-4 rounded-xl transition-all border border-transparent
+                     ${selectedId === notification.id 
+                       ? 'bg-green-50 border-green-200 ring-1 ring-green-300' 
+                       : 'hover:bg-gray-50'
+                     }
+                   `}
+                 >
+                   <div className="flex justify-between items-start mb-1">
+                      <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase">In Attesa</span>
+                      <span className="text-xs text-gray-400">{notification.date}</span>
+                   </div>
+                   <h3 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">{notification.title}</h3>
+                   <p className="text-xs text-gray-500 line-clamp-2">{notification.previewText}</p>
+                 </button>
+               ))
+            )}
+         </div>
+      </div>
+
+
+      {/* COLONNA DESTRA: Dettaglio */}
+      <div className={`w-full md:w-2/3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col ${!selectedId ? 'hidden md:flex' : 'flex'}`}>
+         
+         {selectedNotification ? (
+            <div className="flex-1 overflow-y-auto p-6 md:p-10">
+                 
+                 {/* Header dettaglio */}
+                 <div className="mb-6 flex items-center gap-3">
+                    <div className="bg-orange-100 p-3 rounded-full">
+                        <Store className="w-8 h-8 text-orange-600" />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">{selectedNotification.shopName}</h1>
+                        <p className="text-sm text-gray-500">ID: {selectedNotification.id}</p>
+                    </div>
+                 </div>
+
+                 {/* Dati del negozio da approvare */}
+                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-8">
+                     <h3 className="text-gray-900 font-bold mb-4">Dati inseriti dall'utente:</h3>
+                     <ul className="space-y-3 text-sm text-gray-700">
+                         <li><strong>Categoria:</strong> {selectedNotification.previewText}</li>
+                         <li><strong>Segnalato da:</strong> {selectedNotification.reporterId}</li>
+                         <li><strong>Licenza/Foto:</strong> {selectedNotification.licenseId}</li>
+                     </ul>
+                     
+                     {selectedNotification.imageUrl && (
+                         <div className="mt-4">
+                             <p className="text-xs font-bold mb-1">Immagine allegata:</p>
+                             <img src={selectedNotification.imageUrl} alt="Prova" className="h-40 rounded border border-gray-300 object-cover" />
+                         </div>
+                     )}
+                 </div>
+
+                 <p className="mb-8 text-gray-600">
+                     Questo negozio è stato creato da un utente ed è in attesa di verifica.
+                     Clicca su <b>Verifica e Pubblica</b> per controllare i dati nel form, correggere eventuali errori e pubblicarlo ufficialmente.
+                 </p>
+
+                 {/* ACTION BUTTONS */}
+                 <div className="flex flex-col md:flex-row gap-4 pt-4 border-t border-gray-100">
+                      
+                      {/* Bottone APPROVA (Apre il Modal) */}
+                      <button 
+                        onClick={() => handleOpenApproveModal(selectedNotification)}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-xl font-bold shadow-md flex items-center justify-center gap-2 text-lg transition-transform hover:scale-105"
+                      >
+                         <CheckCircle className="w-6 h-6" /> Verifica e Pubblica
+                      </button>
+
+                      {/* Bottone RESPINGI (Cancella) */}
+                      <button 
+                         onClick={() => handleReject(selectedNotification.id)}
+                         className="flex-1 bg-white border-2 border-red-100 text-red-600 hover:bg-red-50 px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-lg transition-colors"
+                      >
+                         <XCircle className="w-6 h-6" /> Rifiuta e Cancella
+                      </button>
+                 </div>
+            </div>
+         ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
+               <Store className="w-16 h-16 mb-4 opacity-20" />
+               <p className="text-lg font-medium">Seleziona un negozio per valutarlo</p>
+            </div>
+         )}
+      </div>
+
+      {/* IL MODALE DI MODIFICA (Che usiamo per approvare) */}
+      <EditShopModal
+        shop={shopToApprove}
+        isOpen={!!shopToApprove}
+        onClose={() => setShopToApprove(null)}
+        onUpdate={handleShopApproved}
+        userRole={userRole}
+        // Opzionale: puoi passare una prop "isApprovalMode={true}" per cambiare il testo del bottone nel modale da "Salva" a "Approva e Pubblica"
+      />
+
     </div>
   );
 };
