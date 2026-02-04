@@ -88,6 +88,12 @@ export interface Notification {
   shopName?: string; // For Reports
   licenseId?: string; // For Reports (Operator check)
   reporterId?: string; // The username/ID of the user who submitted the report
+
+  pendingOwnerId?: string;      // <--- FONDAMENTALE
+  proprietarioInAttesa?: string; // <--- SICUREZZA EXTRA
+  category?: string;            // <--- Utile per il display
+  address?: string;             // <--- Utile per il display
+  name?: string;
 }
 
 export interface UserVote {

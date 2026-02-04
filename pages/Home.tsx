@@ -487,7 +487,9 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
       const backendPayload = {
         nome: formData.name,
         coordinate: [formData.coordinates.lat, formData.coordinates.lng],
-        categoria: [formData.category], 
+        categoria: formData.categories && formData.categories.length > 0 
+               ? formData.categories 
+               : ["altro"], 
         licenzaOppureFoto: formData.imageUrl || "https://placehold.co/400", 
         linkSito: formData.website,
         
@@ -504,7 +506,7 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
         } else {
              // Qui chiamiamo la POST (che crea il duplicato)
              await createNegozio(backendPayload);
-             alert("Nuova attività creata!");
+             alert("Nuova attività segnalata con successo!");
         }
       
       await fetchShops(); 
