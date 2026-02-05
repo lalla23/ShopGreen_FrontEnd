@@ -1,8 +1,7 @@
 export enum UserRole {
   ANONYMOUS = 'anonimo',
   USER = 'utente',
-  OPERATOR = 'operatore',
-  SELLER = 'venditore'
+  OPERATOR = 'operatore'
 }
 
 export enum ShopCategory {

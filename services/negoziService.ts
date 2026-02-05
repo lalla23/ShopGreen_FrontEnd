@@ -24,21 +24,14 @@ const formatOrariForDisplay = (orariBackend: any): string => {
     return formattedString.trim();
 };
 
-// --- FIX VERA CAUSA: Normalizzazione Categorie ---
 const normalizeCategory = (catDB: string): ShopCategory => {
     if (!catDB) return ShopCategory.OTHER;
-    
-    // Puliamo la stringa da spazi e maiuscole indesiderate
     const clean = catDB.toLowerCase().trim();
-
     if (clean === 'alimenti' || clean === 'food' || clean.includes('aliment')) return ShopCategory.FOOD;
     if (clean === 'vestiario' || clean === 'clothing' || clean.includes('vestit')) return ShopCategory.CLOTHING;
     if (clean.includes('cura') || clean.includes('casa') || clean === 'home_care') return ShopCategory.HOME_CARE;
-    
-    // Controlliamo match esatti con l'enum
     const exactMatch = Object.values(ShopCategory).find(c => c === clean);
     if (exactMatch) return exactMatch;
-
     return ShopCategory.OTHER;
 };
 
@@ -47,36 +40,49 @@ const timeToMinutes = (timeStr: string) => {
   return hours * 60 + minutes;
 };
 
-const isNegozioAperto = (orariDB: any): boolean => {
-  if (!orariDB) return false;
-  const now = new Date();
-  const currentDayIndex = now.getDay(); 
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const giorniKeys = ['domenica', 'lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato'];
-  const keyOggi = giorniKeys[currentDayIndex];
-  const orariOggi = orariDB[keyOggi];
-  if (!orariOggi || orariOggi.chiuso) return false;
+// --- LOGICA CALCOLO STATO (GIALLO INCLUSO) ---
+const isNegozioAperto = (orariDB: any): ShopStatus => {
+  if (!orariDB) return ShopStatus.CLOSED;
   
+  const now = new Date();
+  const currentDayIndex = now.getDay();
+  const giorniKeys = ['domenica', 'lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato'];
+  const orariOggi = orariDB[giorniKeys[currentDayIndex]];
+
+  if (!orariOggi || orariOggi.chiuso) return ShopStatus.CLOSED;
+
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const SOGLIA_PREAVVISO = 30; // Minuti per far scattare il giallo
+
   if (orariOggi.slot && Array.isArray(orariOggi.slot)) {
       for (const slot of orariOggi.slot) {
         const start = timeToMinutes(slot.apertura);
         const end = timeToMinutes(slot.chiusura);
-        if (currentMinutes >= start && currentMinutes <= end) return true;
+
+        // 1. È APERTO ADESSO?
+        if (currentMinutes >= start && currentMinutes < end) {
+            return ShopStatus.OPEN;
+        }
+
+        // 2. APRE A BREVE? (Giallo)
+        if (currentMinutes < start && (start - currentMinutes) <= SOGLIA_PREAVVISO) {
+            return ShopStatus.OPENING_SOON; 
+        }
       }
   }
-  return false;
+  
+  return ShopStatus.CLOSED;
 };
 
 const mapNegozio = (dbItem: any): Shop => {
   let statusCalcolato = ShopStatus.UNVERIFIED; 
+  
   if (!dbItem.sostenibilitàVerificata) {
       statusCalcolato = ShopStatus.UNVERIFIED; 
   } else {
-      if (isNegozioAperto(dbItem.orari)) {
-          statusCalcolato = ShopStatus.OPEN; 
-      } else {
-          statusCalcolato = ShopStatus.CLOSED; 
-      }
+      // --- FIX: ASSEGNAZIONE DIRETTA ---
+      // Ora usiamo direttamente il valore ritornato (OPEN, CLOSED o OPENING_SOON)
+      statusCalcolato = isNegozioAperto(dbItem.orari);
   }
 
   // MAPPING CATEGORIE ROBUSTO
@@ -103,7 +109,6 @@ const mapNegozio = (dbItem: any): Shop => {
           : dbItem.proprietarioInAttesa.toString();
   }
 
-  // Creazione oggetto coordinate pulito
   const coords = {
       lat: dbItem.coordinate && dbItem.coordinate.length > 0 ? dbItem.coordinate[0] : 0,
       lng: dbItem.coordinate && dbItem.coordinate.length > 1 ? dbItem.coordinate[1] : 0
@@ -115,7 +120,7 @@ const mapNegozio = (dbItem: any): Shop => {
     categories: frontendCategories,
     status: statusCalcolato,
     description: dbItem.descrizione || "",
-    coordinates: coords, // Usato per l'auto-fill dei link
+    coordinates: coords, 
     hours: formatOrariForDisplay(dbItem.orari),
     rawHours: dbItem.orari, 
     imageUrl: dbItem.licenzaOppureFoto || "",

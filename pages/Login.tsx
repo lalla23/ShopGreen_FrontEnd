@@ -328,15 +328,6 @@ const handleCredentialResponse = async (response: any) => {
                        <User className="w-5 h-5 mb-1" />
                        <span className="text-[10px] font-bold">Utente</span>
                      </button>
-                     
-                     <button
-                       type="button"
-                       onClick={() => setRegRole(UserRole.SELLER)}
-                       className={`flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all ${regRole === UserRole.SELLER ? 'border-[#7dad57] bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
-                     >
-                       <ShoppingBag className="w-5 h-5 mb-1" />
-                       <span className="text-[10px] font-bold">Venditore</span>
-                     </button>
 
                      <button
                        type="button"

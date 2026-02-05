@@ -534,6 +534,7 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
             categoria: updatedShop.categories,
             maps: updatedShop.googleMapsLink,
             mappe: updatedShop.iosMapsLink,
+            coordinate: [updatedShop.coordinates.lat, updatedShop.coordinates.lng],
             ...(orariBackend && { orari: orariBackend }),
             ...(updatedShop.ownerId && { proprietario: updatedShop.ownerId })
             // Aggiungi qui altri campi se il modale di edit li gestisce

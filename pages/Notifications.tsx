@@ -97,7 +97,10 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
                nome: updatedShop.name,
                licenzaOppureFoto: updatedShop.imageUrl,
                categoria: updatedShop.categories, 
-               coordinate: [updatedShop.coordinates.lat, updatedShop.coordinates.lng],
+               coordinate: [
+                   Number(updatedShop.coordinates.lat), 
+                   Number(updatedShop.coordinates.lng)
+               ],
                orari: orariBackend, 
                verificatoDaOperatore: true,
                proprietario: updatedShop.ownerId,
