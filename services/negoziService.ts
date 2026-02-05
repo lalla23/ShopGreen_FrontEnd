@@ -74,7 +74,7 @@ const isNegozioAperto = (orariDB: any): ShopStatus => {
   return ShopStatus.CLOSED;
 };
 
-const mapNegozio = (dbItem: any): Shop => {
+export const mapNegozio = (dbItem: any): Shop => {
   let statusCalcolato = ShopStatus.UNVERIFIED; 
   
   if (!dbItem.sostenibilitàVerificata) {

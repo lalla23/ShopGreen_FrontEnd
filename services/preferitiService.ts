@@ -1,7 +1,8 @@
-import { Negozio } from './negoziService';
+import { Shop } from '../types';
+import { mapNegozio } from './negoziService';
 const API_URL = 'http://localhost:3000/api/preferiti/users';
 
-export const getPreferiti = async (user_id: string): Promise<Negozio[]> => {
+export const getPreferiti = async (user_id: string): Promise<Shop[]> => {
   try {
     let url = API_URL + '/' + user_id;
     const token = localStorage.getItem('token');
@@ -23,7 +24,8 @@ export const getPreferiti = async (user_id: string): Promise<Negozio[]> => {
       const erroreServer = await response.json();
       throw new Error(erroreServer.dettagli);
     }
-    return await response.json();
+    const datiBackend = await response.json();
+    return datiBackend.map((item: any) => mapNegozio(item));
   } 
   catch (error) {
     console.error("Errore nella visualizzazione dei preferiti", error);

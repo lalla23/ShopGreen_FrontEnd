@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Globe, Moon, Sun, Bell, FileText, Shield, ChevronRight, Check } from 'lucide-react';
 
 interface SettingsProps {
@@ -17,6 +18,18 @@ const Settings: React.FC<SettingsProps> = ({
 }) => {
   const [activeDoc, setActiveDoc] = useState<'privacy' | 'guidelines' | null>(null);
 
+
+  const location = useLocation(); // Hook per leggere lo stato della navigazione
+
+  // Effetto per aprire automaticamente il documento se richiesto
+  useEffect(() => {
+    if (location.state && location.state.openDoc) {
+      setActiveDoc(location.state.openDoc);
+      // Pulisci lo stato per evitare riaperture indesiderate se necessario, 
+      // ma in questo contesto semplice va bene così.
+      window.history.replaceState({}, document.title); // Opzionale: pulisce lo stato
+    }
+  }, [location]);
   // Documentation Content (RF7.4)
   //GRAFICA:
   const renderDocContent = () => {
@@ -36,7 +49,7 @@ const Settings: React.FC<SettingsProps> = ({
             <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
               {activeDoc === 'privacy' ? (
                 <>
-                  <p>Ultimo aggiornamento: Ottobre 2023</p>
+                  <p>Ultimo aggiornamento: Dicembre 2025</p>
                   <h3>1. Raccolta Dati</h3>
                   <p>Raccogliamo solo i dati necessari per il funzionamento del servizio (username, preferenze, liste preferiti).</p>
                   <h3>2. Utilizzo</h3>
@@ -89,7 +102,6 @@ const Settings: React.FC<SettingsProps> = ({
 
       <div className="space-y-6">
         
-        {/* RF7.1: Language Selection */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -119,8 +131,6 @@ const Settings: React.FC<SettingsProps> = ({
             </div>
           </div>
         </section>
-
-        {/* RF7.2: Theme Selection */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -147,7 +157,6 @@ const Settings: React.FC<SettingsProps> = ({
           </div>
         </section>
 
-        {/* RF7.3: Notifications */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -173,7 +182,7 @@ const Settings: React.FC<SettingsProps> = ({
           </div>
         </section>
 
-        {/* RF7.4: Documentation */}
+
         <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">

@@ -569,7 +569,7 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
   const getStatusLabel = () => {
     if (shop.status === ShopStatus.OPEN) return { text: 'Sostenibilità verificata', color: 'bg-green-600' };
     if (shop.status === ShopStatus.CLOSED) return { text: 'Sostenibilità verificata', color: 'bg-green-600' };
-    if (shop.status === ShopStatus.OPENING_SOON) return { text: "Sostenibilità verificata", color: "bg-green-600"};
+    if (shop.status === ShopStatus.OPENING_SOON) return { text: "Sostenibilità verificata", color: 'bg-green-600'};
     return { text: 'Sostenibilità non verificata', color: 'bg-gray-500' };
   };
 
@@ -779,6 +779,8 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
                         <ThumbsUp className="w-3 h-3"/> Feedback Community
                     </p>
                     
+                      
+
                     {/* --- MODIFICA QUI: NASCONDIAMO I BOTTONI AGLI ANONIMI --- */}
                     {userRole !== UserRole.ANONYMOUS ? (
                       <div className="flex gap-2">
