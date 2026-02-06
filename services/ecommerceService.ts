@@ -32,13 +32,13 @@ export const fetchSellers = async(Zone?: string, Categorie?: string): Promise<Se
         const data = await response.json();
 
         if (!response.ok) {
-        throw new Error(data.message || 'Error in fetch sellers');     
+        throw new Error(data.message);     
         }
 
          return data.map(mapSeller);
 
     }catch(error:any){
-        console.error("fetch sellers error:", error);
+        console.error("Errore nel recupero dei venditori e-commerce", error);
         throw error;
     }
 
