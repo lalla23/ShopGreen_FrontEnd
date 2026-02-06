@@ -40,7 +40,6 @@ const timeToMinutes = (timeStr: string) => {
   return hours * 60 + minutes;
 };
 
-// --- LOGICA CALCOLO STATO (GIALLO INCLUSO) ---
 const isNegozioAperto = (orariDB: any): ShopStatus => {
   if (!orariDB) return ShopStatus.CLOSED;
   
@@ -52,19 +51,17 @@ const isNegozioAperto = (orariDB: any): ShopStatus => {
   if (!orariOggi || orariOggi.chiuso) return ShopStatus.CLOSED;
 
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const SOGLIA_PREAVVISO = 30; // Minuti per far scattare il giallo
+  const SOGLIA_PREAVVISO = 30;
 
   if (orariOggi.slot && Array.isArray(orariOggi.slot)) {
       for (const slot of orariOggi.slot) {
         const start = timeToMinutes(slot.apertura);
         const end = timeToMinutes(slot.chiusura);
 
-        // 1. È APERTO ADESSO?
         if (currentMinutes >= start && currentMinutes < end) {
             return ShopStatus.OPEN;
         }
 
-        // 2. APRE A BREVE? (Giallo)
         if (currentMinutes < start && (start - currentMinutes) <= SOGLIA_PREAVVISO) {
             return ShopStatus.OPENING_SOON; 
         }
@@ -80,12 +77,9 @@ export const mapNegozio = (dbItem: any): Shop => {
   if (!dbItem.sostenibilitàVerificata) {
       statusCalcolato = ShopStatus.UNVERIFIED; 
   } else {
-      // --- FIX: ASSEGNAZIONE DIRETTA ---
-      // Ora usiamo direttamente il valore ritornato (OPEN, CLOSED o OPENING_SOON)
       statusCalcolato = isNegozioAperto(dbItem.orari);
   }
 
-  // MAPPING CATEGORIE ROBUSTO
   const dbCategories: string[] = dbItem.categoria || [];
   const frontendCategories = dbCategories.map(catStr => normalizeCategory(catStr));
   

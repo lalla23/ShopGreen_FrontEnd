@@ -6,7 +6,6 @@ import { getPreferiti, deletePreferito } from '../services/preferitiService';
 
 interface FavoritesProps {
   currentUserId: string | null;
-  // Funzione per notificare App.tsx che un preferito è stato rimosso
   onRemoveUpdate: (id: string) => void; 
 }
 
@@ -16,7 +15,6 @@ const Favorites: React.FC<FavoritesProps> = ({ currentUserId, onRemoveUpdate }) 
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Caricamento dei preferiti dal Backend
   useEffect(() => {
     const fetchFavorites = async () => {
       if (!currentUserId) return;
@@ -35,7 +33,6 @@ const Favorites: React.FC<FavoritesProps> = ({ currentUserId, onRemoveUpdate }) 
     fetchFavorites();
   }, [currentUserId]);
 
-  // Gestione Rimozione
   const handleRemove = async (e: React.MouseEvent, shopId: string) => {
     e.stopPropagation(); // Evita il click sulla card
     if (!currentUserId) return;
@@ -47,11 +44,10 @@ const Favorites: React.FC<FavoritesProps> = ({ currentUserId, onRemoveUpdate }) 
       setFavoriteShops(prev => prev.filter(s => s.id !== shopId));
       onRemoveUpdate(shopId);
     } catch (err) {
-      alert("Impossibile rimuovere il preferito al momento.");
+      alert("Impossibile rimuovere il preferito al momento");
     }
   };
 
-  // Click sulla Card -> Vai alla Mappa
   const handleCardClick = (shop: Shop) => {
     navigate('/', { 
       state: { 
@@ -61,7 +57,6 @@ const Favorites: React.FC<FavoritesProps> = ({ currentUserId, onRemoveUpdate }) 
     });
   };
 
-  // Helper per visualizzare lo stato (Colore e Testo)
   const getStatusInfo = (status: ShopStatus) => {
     switch (status) {
       case ShopStatus.OPEN: 
@@ -99,7 +94,7 @@ const Favorites: React.FC<FavoritesProps> = ({ currentUserId, onRemoveUpdate }) 
           {favoriteShops.length}
         </span>
       </h1>
-      <p className="text-gray-500 mb-8">Gestisci le tue attività salvate per accedervi velocemente.</p>
+      <p className="text-gray-500 mb-8">Gestisci le tue attività salvate per accedervi velocemente</p>
 
       {favoriteShops.length === 0 ? (
         <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
@@ -123,18 +118,13 @@ const Favorites: React.FC<FavoritesProps> = ({ currentUserId, onRemoveUpdate }) 
                 onClick={() => handleCardClick(shop)}
                 className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl hover:border-green-300 transition-all cursor-pointer group flex flex-col h-full"
               >
-               {/* Box colorato al posto dell'immagine */}
           <div className={`h-40 w-full relative overflow-hidden flex items-center justify-center ${
               shop.status==ShopStatus.UNVERIFIED ? 'bg-gray-100' : 'bg-emerald-100'
             }`}>
-          
-              {/* Icona decorativa al centro (verde se sostenibile, grigia se standard) */}
           <Navigation className={`w-16 h-16 ${
               shop.status==ShopStatus.UNVERIFIED ? 'text-gray-300' : 'text-emerald-200' 
             }`} 
           />
-
-          {/* Pulsante Rimuovi */}
           <div className="absolute top-3 right-3">
             <button 
               onClick={(e) => handleRemove(e, shop.id)}
@@ -148,7 +138,6 @@ const Favorites: React.FC<FavoritesProps> = ({ currentUserId, onRemoveUpdate }) 
 
                 <div className="p-5 flex flex-col flex-1">
                   <div className="mb-auto">
-                    {/* CATEGORIA DINAMICA DAL DB */}
                     <span className="text-xs font-bold tracking-wider text-green-600 uppercase mb-2 inline-block bg-green-50 px-2 py-1 rounded-md capitalize">
                       {shop.categories?.[0] || 'Altro'}
                     </span>
@@ -162,15 +151,12 @@ const Favorites: React.FC<FavoritesProps> = ({ currentUserId, onRemoveUpdate }) 
                     )}
                   </div>
                   
-                  {/* STATO (Aperto/Chiuso) collegato al DB, SENZA ORARI */}
                   <div className="mt-4 mb-4 flex items-center gap-2">
                       <div className={`w-2.5 h-2.5 rounded-full ${statusInfo.color}`}></div>
                       <span className={`text-sm font-medium ${statusInfo.text}`}>
                         {statusInfo.label}
                       </span>
                   </div>
-
-                  {/* Pulsanti */}
                   <div className="flex gap-2 mt-auto pt-4 border-t border-gray-100">
                     <a 
                       href={`https://www.google.com/maps?q=${shop.coordinates.lat},${shop.coordinates.lng}`}

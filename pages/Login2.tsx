@@ -18,13 +18,12 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
 const handleLogin = async(e:React.FormEvent) => {
     
-    e.preventDefault(); //prevengo relod pagina se no si eliminano i dati inseriti dall'utente
-
+    e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try{
-        const userDati = await login(username, password); //questa è la risposta del login da authService
+        const userDati = await login(username, password);
         onLoginSuccess(userDati);
     }catch(error){
         console.log("errore " + error.message);

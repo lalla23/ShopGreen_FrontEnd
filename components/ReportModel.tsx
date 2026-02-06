@@ -83,7 +83,6 @@ const ReportModal: React.FC<ReportModalProps> = ({
                             </div>
                         </div>
 
-                        {/* Reason Grid (Radio Buttons styled as pills) */}
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-gray-600 ml-2">
                                 Motivo della segnalazione
@@ -108,7 +107,6 @@ const ReportModal: React.FC<ReportModalProps> = ({
                             </div>
                         </div>
 
-                        {/* Details Textarea */}
                         <div
                             className={`transition-all duration-300 overflow-hidden ${
                                 reason
@@ -131,7 +129,6 @@ const ReportModal: React.FC<ReportModalProps> = ({
                             />
                         </div>
 
-                        {/* Submit Button */}
                         <div className="pt-2">
                             <button
                                 type="submit"
@@ -143,7 +140,6 @@ const ReportModal: React.FC<ReportModalProps> = ({
                         </div>
                     </form>
                 ) : (
-                    // Success State
                     <div className="flex flex-col items-center justify-center py-12 space-y-6">
                         <div className="w-24 h-24 bg-[#d9e8cd] rounded-full flex items-center justify-center animate-bounce shadow-lg">
                             <CheckCircle className="w-12 h-12 text-green-800" />

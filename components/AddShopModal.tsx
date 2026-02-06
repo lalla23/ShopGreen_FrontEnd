@@ -157,14 +157,12 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onSubmit, 
     onClose();
   };
 
-  // --- LOGICA MODIFICATA PER PDF ---
   const renderImageUpload = (label: string, isLicense = false) => {
     const isPdf = previewImage?.startsWith('data:application/pdf');
 
     return (
       <div className="space-y-2">
           <label className="text-gray-600 font-bold text-sm ml-4">{label} (Foto o PDF)</label>
-          {/* ACCEPT: Aggiunto application/pdf */}
           <input type="file" accept="image/*,application/pdf" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
           
           {!previewImage ? (
@@ -175,7 +173,6 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onSubmit, 
           ) : (
               <div className={`relative w-full ${isLicense ? 'h-32' : 'h-56'} rounded-[20px] overflow-hidden shadow-md group bg-gray-50 border border-gray-200`}>
                   
-                  {/* ANTEPRIMA CONDIZIONALE: Immagine o Icona PDF */}
                   {isPdf ? (
                       <div className="w-full h-full flex flex-col items-center justify-center text-red-500">
                           <FileText className="w-12 h-12 mb-2" />
@@ -231,7 +228,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onSubmit, 
                         {activeTab === 'claim' && isAlreadyPresent ? (
                             <div className="relative">
                                 {existingShops.length === 0 ? (
-                                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-2xl text-yellow-800 text-sm">⚠️ Nessun negozio caricato. Ricarica la pagina.</div>
+                                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-2xl text-yellow-800 text-sm">Nessun negozio caricato. Ricarica la pagina.</div>
                                 ) : (
                                     <>
                                         <select value={selectedExistingShopId || ""} onChange={(e) => handleExistingShopSelect(e.target.value)} className="w-full bg-green-50 text-gray-800 font-medium px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#7dad57] appearance-none border border-green-200 cursor-pointer">

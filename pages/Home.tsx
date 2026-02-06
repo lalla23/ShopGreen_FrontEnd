@@ -8,11 +8,9 @@ import AddShopModal from '../components/AddShopModal';
 import EditShopModal from '../components/EditShopModal';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-// --- IMPORTIAMO I SERVIZI REALI ---
 import { getNegozi, createNegozio, updateNegozio } from '../services/negoziService';
 import { sendFeedback } from '../services/feedbackService';
 
-// Helper per tracciare il centro della mappa e spostarla programmaticamente
 const MapController: React.FC<{ 
   center: { lat: number; lng: number }; 
   onMove: (center: { lat: number; lng: number }) => void;
@@ -20,7 +18,6 @@ const MapController: React.FC<{
 }> = ({ center, onMove, zoom }) => {
   const map = useMap();
 
-  // Effetto per spostare la mappa quando cambia il centro "esterno" (es. dai preferiti)
   useEffect(() => {
     if (center) {
       map.setView([center.lat, center.lng], zoom || map.getZoom(), { animate: true });
@@ -35,7 +32,6 @@ const MapController: React.FC<{
   return null;
 };
 
-// Helper per convertire gli orari dal Form al Backend
 const convertHoursToBackend = (rawHours: any[]) => {
     const dayMap: { [key: string]: string } = {
         'Lunedì': 'lunedi', 'Martedì': 'martedi', 'Mercoledì': 'mercoledi',
@@ -64,7 +60,6 @@ const convertHoursToBackend = (rawHours: any[]) => {
     return backendHours;
 };
 
-// Fix per i problemi di rendering della mappa (piastrelle grigie)
 const MapInvalidator = () => {
   const map = useMap();
   useEffect(() => {
@@ -89,7 +84,6 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
   const [activeCategory, setActiveCategory] = useState<FilterType>('Tutte');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // --- STATO MAPPA ---
   const [mapCenter, setMapCenter] = useState(TRENTO_CENTER);
   const [mapZoom, setMapZoom] = useState(14);
 
@@ -97,12 +91,10 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
   const [shops, setShops] = useState<Shop[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
-  // --- STATO MODALI ---
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [addModalInitialData, setAddModalInitialData] = useState<{name?: string, ownerId?: string} | undefined>(undefined);
   const [editingShop, setEditingShop] = useState<Shop | null>(null);
 
-  // --- STATO POPUP FORZATO ---
   const [forceOpenId, setForceOpenId] = useState<string | null>(null);
 
   const location = useLocation();
@@ -131,30 +123,20 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
     }
   };
 
-  // Ricarica i negozi ogni volta che cambia la categoria selezionata
   useEffect(() => {
     fetchShops();
   }, [activeCategory]);
 
-  // --- GESTIONE NAVIGAZIONE (DA NOTIFICHE O PREFERITI) ---
   useEffect(() => {
     if (location.state) {
-        // Caso 1: Arrivo da "Preferiti" (focus su negozio)
         if (location.state.focusShopId && location.state.center) {
             const { focusShopId, center } = location.state;
-            
-            // Imposta centro e zoom
             setMapCenter(center);
-            setMapZoom(16); // Zoom più vicino
-            
-            // Forza apertura popup
+            setMapZoom(16);
             setForceOpenId(focusShopId);
-
-            // Resetta lo state per evitare loop
             navigate(location.pathname, { replace: true, state: {} });
         }
-        
-        // Caso 2: Arrivo da "Notifiche" (creazione negozio da segnalazione)
+       
         else if (location.state.action === 'create_shop_from_report') {
             const { data } = location.state;
             setAddModalInitialData({
@@ -168,14 +150,12 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
   }, [location, navigate]);
 
 
-  // --- 2. CREAZIONE NEGOZIO (CREATE) ---
   const handleAddShop = async (formData: any) => {
     try {
       let orariBackend;
       if (formData.rawHours) {
           orariBackend = convertHoursToBackend(formData.rawHours);
       } else {
-          // Fallback di sicurezza
           orariBackend = {
              lunedi: { chiuso: false, slot: [{ apertura: "09:00", chiusura: "18:00" }] },
              martedi: { chiuso: false, slot: [{ apertura: "09:00", chiusura: "18:00" }] },
@@ -200,11 +180,9 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
       };
 
       if (formData.isExistingUpdate === true && formData.id) {
-             // Qui chiamiamo la PUT (Rivendicazione)
              await updateNegozio(formData.id, backendPayload);
              alert("Richiesta di rivendicazione inviata con successo!");
         } else {
-             // Qui chiamiamo la POST (Nuova segnalazione)
              await createNegozio(backendPayload);
              alert("Nuova attività segnalata con successo!");
         }
@@ -219,7 +197,6 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
     }
   };
 
-  // --- 3. MODIFICA NEGOZIO (UPDATE) ---
   const handleUpdateShop = async (updatedShop: Shop) => {
       try {
         let orariBackend;
@@ -235,7 +212,6 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
             maps: updatedShop.googleMapsLink,
             mappe: updatedShop.iosMapsLink,
             
-            // Importante: passiamo le coordinate aggiornate
             coordinate: [updatedShop.coordinates.lat, updatedShop.coordinates.lng],
 
             ...(orariBackend && { orari: orariBackend }),
@@ -253,13 +229,12 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
       }
   };
 
-  // --- 4. GESTIONE FEEDBACK (VOTO) ---
   const handleVerify = async (id: string, isPositive: boolean) => {
       if (!currentUserId) return;
       try {
         await sendFeedback(id, isPositive);
-        await fetchShops(); // Ricarichiamo per vedere il nuovo score/status
-        alert(isPositive ? "Voto positivo inviato! 👍" : "Segnalazione negativa inviata! 👎");
+        await fetchShops();
+        alert(isPositive ? "Voto positivo inviato! " : "Segnalazione negativa inviata! ");
       } catch (error: any) {
         alert(error.message);
       }
@@ -269,7 +244,6 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
     alert("Le recensioni testuali saranno disponibili a breve! Per ora usa i voti Sostenibile/Non Sostenibile.");
   };
 
-  // --- FILTRO CLIENT-SIDE (Solo Ricerca Testuale) ---
   const filteredShops = useMemo(() => {
     return shops.filter(shop => {
       const matchesSearch = shop.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -285,14 +259,11 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
   ];
 
   const handleMapMove = useCallback((center: { lat: number; lng: number }) => {
-    // Aggiorniamo lo state locale per tenerlo sincronizzato
-    // Nota: Non settiamo mapCenter qui altrimenti scatta il loop con useEffect
   }, []);
 
   return (
     <div className="relative w-full h-[calc(100vh-64px)] overflow-hidden bg-gray-100">
-      
-      {/* Barra di Ricerca e Filtri */}
+
       <div className="absolute top-4 left-4 right-4 z-[400] flex flex-col gap-3 pointer-events-none">
         <div className="w-full max-w-2xl pointer-events-auto shadow-lg">
           <div className="relative">
@@ -327,7 +298,6 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
         </div>
       </div>
 
-      {/* Mappa */}
       <MapContainer 
         center={[TRENTO_CENTER.lat, TRENTO_CENTER.lng]} 
         zoom={14} 
@@ -342,7 +312,6 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
         
         <MapInvalidator />
         
-        {/* Passiamo center e zoom dinamici al controller */}
         <MapController center={mapCenter} zoom={mapZoom} onMove={handleMapMove} />
 
         {isLoading && (
@@ -364,15 +333,12 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
             onVerify={handleVerify}
             onAddReview={handleAddReview}
             onEditClick={(s) => setEditingShop(s)}
-            
-            // Se forceOpenId corrisponde, apriamo forzatamente il popup
             forceOpen={forceOpenId === shop.id || filteredShops.length === 1}
           />
         ))}
 
       </MapContainer>
 
-      {/* Bottone "Segnala Attività" */}
       {userRole !== UserRole.ANONYMOUS && (
         <div className="absolute bottom-6 right-6 z-[400] pointer-events-auto">
           <button 

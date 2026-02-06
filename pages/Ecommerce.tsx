@@ -4,8 +4,6 @@ import { Seller } from '../types';
 import { Link } from 'react-router-dom';
 import * as ecommerceService from '../services/ecommerceService';
 
-// --- LISTE FISSE ---
-
 const DB_CATEGORIES = [
   "cura della casa e della persona",
   "alimenti",
@@ -27,8 +25,6 @@ const DB_ZONES = [
   "Mattarello"
 ];
 
-// ----------------
-
 interface EcommerceProps {
   sellers: Seller[];
 }
@@ -40,11 +36,8 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('Tutte');
   const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
-
-  // Stato per gestire l'errore immagine nel MODALE (Popup)
   const [modalImgError, setModalImgError] = useState(false);
 
-  // Quando apriamo un nuovo venditore, resettiamo l'errore dell'immagine
   useEffect(() => {
     if (selectedSeller) {
       setModalImgError(false);
@@ -58,7 +51,7 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
         const data = await ecommerceService.fetchSellers();
         setDbSellers(data);
       } catch (err) {
-        console.error("Fallimento caricamento E-shops dal database.");
+        console.error("Fallimento caricamento E-shops dal database");
       } finally {
         setIsLoading(false);
       }
@@ -92,7 +85,7 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
         <Loader2 className="w-12 h-12 text-green-600 animate-spin mb-4" />
-        <p className="font-bold text-gray-700 italic">Connessione al Mercatino in corso...</p>
+        <p className="font-bold text-gray-700 italic">Connessione ai venditori e-commerce in corso...</p>
       </div>
     );
   }
@@ -100,13 +93,11 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        
-        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
           <div className="text-center md:text-left">
-             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Mercatino Locale</h1>
+             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Venditori E-commerce</h1>
              <p className="text-gray-500 max-w-2xl">
-               Scopri i venditori locali attivi nel tuo quartiere.
+               Scopri i venditori locali attivi nel tuo quartiere
              </p>
           </div>
           
@@ -120,15 +111,12 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
         </div>
 
         {!selectedZone ? (
-          /* VISTA 1: SELEZIONE ZONA */
           <div className="animate-in fade-in zoom-in duration-300">
              <h2 className="text-xl font-semibold text-center text-gray-700 mb-8">
                Seleziona una zona per esplorare
              </h2>
              
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 max-w-5xl mx-auto">
-              
-                {/* TUTTE LE ZONE */}
                 <button
                     onClick={() => setSelectedZone('TUTTE')}
                     className="group relative flex flex-col items-center justify-center p-10 rounded-3xl bg-green-600 border border-green-500 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
@@ -143,8 +131,6 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
                     {dbSellers.length} venditori totali
                     </div>
                 </button>
-
-                {/* ZONE REALI */}
                 {DB_ZONES.map((zoneName) => {
                     const sellersInZone = dbSellers.filter(s => s.zoneIds.includes(zoneName)).length;
                     
@@ -171,7 +157,6 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
              </div>
           </div>
         ) : (
-          /* VISTA 2: LISTA VENDITORI */
           <div className="animate-in slide-in-from-right duration-300">
             
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
@@ -187,8 +172,6 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
                  {activeZoneName}
                </h2>
             </div>
-
-            {/* FILTRI CATEGORIE */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-8 sticky top-20 z-10">
               <div className="flex items-center gap-3 mb-3 md:mb-0">
                  <Filter className="w-5 h-5 text-gray-400" />
@@ -211,7 +194,6 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
               </div>
             </div>
 
-            {/* GRIGLIA RISULTATI */}
             {filteredSellers.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredSellers.map((seller) => (
@@ -241,7 +223,6 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
 
       </div>
 
-      {/* MODALE DETTAGLIO VENDITORE */}
       {selectedSeller && (
         <div className="fixed inset-0 z-[3000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-[30px] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 relative max-h-[90vh] overflow-y-auto">
@@ -258,11 +239,6 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
               <div className="px-8 pb-8 relative">
                  <div className="-mt-16 mb-4 flex justify-between items-end">
                    <div className="relative">
-                     
-                     {/* LOGICA AVATAR MODALE: 
-                         Se non c'è URL O se c'è stato un errore -> Mostra Omino <User/>
-                         Altrimenti -> Mostra immagine
-                     */}
                      {(!selectedSeller.avatarUrl || modalImgError) ? (
                         <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
                            <User className="w-16 h-16 text-gray-400" />
@@ -271,7 +247,7 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
                         <img 
                           src={selectedSeller.avatarUrl} 
                           alt={selectedSeller.username}
-                          onError={() => setModalImgError(true)} // Se fallisce, attiva l'omino
+                          onError={() => setModalImgError(true)} 
                           className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg bg-white" 
                         />
                      )}
@@ -298,14 +274,14 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
 
                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-gray-600 text-sm leading-relaxed">
                       <div className="flex items-center gap-2 mb-2 text-gray-900 font-bold text-xs uppercase tracking-wider">
-                         <Info className="w-4 h-4 text-green-600" /> Bio & Dettagli
+                         <Info className="w-4 h-4 text-green-600" /> Dettagli
                       </div>
                       {selectedSeller.bio || "Informazioni non disponibili."}
                    </div>
 
                    <div>
                      <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                       <Tag className="w-4 h-4 text-gray-400" /> Categorie Prodotti
+                       <Tag className="w-4 h-4 text-gray-400" /> Categorie prodotti
                      </h3>
                      <div className="flex flex-wrap gap-2">
                        {selectedSeller.categories.map(cat => (
@@ -318,7 +294,7 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
 
                    <div>
                      <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                       <ShoppingBag className="w-4 h-4 text-gray-400" /> Link Esterni
+                       <ShoppingBag className="w-4 h-4 text-gray-400" /> Link esterni
                      </h3>
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                        {selectedSeller.platformLinks.map((link, idx) => (
@@ -344,13 +320,11 @@ const Ecommerce: React.FC<EcommerceProps> = () => {
   );
 };
 
-// COMPONENTE CARD VENDITORE AGGIORNATO
 const SellerCard: React.FC<{ 
     seller: Seller; 
     onClick: () => void;
 }> = ({ seller, onClick }) => {
-  
-  // Ogni card gestisce il suo stato di errore immagine
+
   const [imgError, setImgError] = useState(false);
 
   return (
@@ -361,8 +335,6 @@ const SellerCard: React.FC<{
        <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-4">
             <div className="relative">
-              
-              {/* LOGICA AVATAR CARD: Omino se manca/errore, altrimenti Img */}
               {(!seller.avatarUrl || imgError) ? (
                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center border-2 border-white shadow-sm">
                    <User className="w-8 h-8 text-gray-400" />
@@ -371,7 +343,7 @@ const SellerCard: React.FC<{
                  <img 
                    src={seller.avatarUrl} 
                    alt={seller.username}
-                   onError={() => setImgError(true)} // Attiva l'omino se fallisce
+                   onError={() => setImgError(true)}
                    className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" 
                  />
               )}
@@ -380,7 +352,7 @@ const SellerCard: React.FC<{
             </div>
             <div>
                <h3 className="font-bold text-lg text-gray-900 leading-tight group-hover:text-green-700 transition-colors">{seller.username}</h3>
-               <p className="text-xs text-green-600 font-medium mt-0.5">Profilo Verificato</p>
+               <p className="text-xs text-green-600 font-medium mt-0.5">Profilo verificato</p>
             </div>
           </div>
        </div>
@@ -400,7 +372,7 @@ const SellerCard: React.FC<{
        
        <div className="space-y-2 pt-4 border-t border-gray-50 flex justify-between items-center">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-             Dettagli Profilo
+             Dettagli profilo
           </p>
           <div className="bg-gray-100 text-gray-500 p-2 rounded-full group-hover:bg-green-100 group-hover:text-green-700 transition-colors">
              <ArrowLeft className="w-4 h-4 rotate-180" />

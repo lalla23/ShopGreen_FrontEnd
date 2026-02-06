@@ -8,24 +8,19 @@ interface UserData {
   id: string;
 }
 
-// per trasformare le string di mongoDB in Enum su types
 const mappingRole = (roleString?: string): UserRole => {
   switch (roleString) {
     case 'operatore':
       return UserRole.OPERATOR;
-    case 'venditore':
-      return UserRole.SELLER;
     case 'utente':
       return UserRole.USER;
     default:
-      //per sicurezza se c'è quanche errore metto per default user 
       return UserRole.USER;
   }
 };
 
-const API_URL = 'http://localhost:3000'; //indirizzo server
+const API_URL = 'http://localhost:3000';
 
-// LOGIN
 export const login = async (body: {}, google = false): Promise<UserData> => { //Promise<UserData> questo permette di restituire un ogg. ti tipo UserData
   
   try {
@@ -70,15 +65,12 @@ export const login = async (body: {}, google = false): Promise<UserData> => { //
   }
 };
 
-// In authService.ts
-
-// REGISTRAZIONE
+//registrazione
 export const register = async (username: string, password: string, email: string, role: UserRole): Promise<{ success: boolean; message: string }> => {
   try {
    
     //trasformo ruolo in stringe per mandarle a mongoDB
     let roleString = 'utente';
-    if (role === UserRole.SELLER) roleString = 'venditore';
     if (role === UserRole.OPERATOR) roleString = 'operatore';
 
     const response = await fetch(`${API_URL}/api/auth/register`, {

@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Notification, NotificationType, UserRole, Shop } from '../types';
 import { Bell, CheckCircle, Info, FileText, XCircle, Loader2, Store, UserCheck, MapPin, AlertTriangle } from 'lucide-react';
-
-// --- USIAMO DIRETTAMENTE IL SERVICE DEI NEGOZI ---
-// Bypassiamo notifcheService per essere sicuri di avere tutti i dati (proprietarioInAttesa incluso)
 import { getNegozi, updateNegozio, deleteNegozio, getNegozioById } from '../services/negoziService';
 
 import EditShopModal from '../components/EditShopModal';
@@ -40,11 +37,7 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
   const refreshNotifications = async () => {
         setIsLoading(true);
         try {
-            // --- BYPASS CRUCIALE ---
-            // Chiediamo i negozi "non verificati" o con "rivendicazioni" direttamente alla fonte
             const shops = await getNegozi(undefined, undefined, false);
-            
-            // Li trasformiamo in notifiche per la UI
             const mappedNotifications: Notification[] = shops.map(shop => ({
                 id: shop.id,
                 type: NotificationType.REPORT,
@@ -56,12 +49,10 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
                 date: 'In attesa', 
                 read: false,
                 imageUrl: shop.imageUrl,
-                // --- QUI PASSIAMO IL DATO CHE MANCAVA ---
                 pendingOwnerId: shop.pendingOwnerId, 
                 proprietarioInAttesa: shop.pendingOwnerId,
-                // ----------------------------------------
                 address: `Lat: ${shop.coordinates.lat.toFixed(4)}, Lng: ${shop.coordinates.lng.toFixed(4)}`,
-                reporterId: shop.ownerId // Se c'era già un owner
+                reporterId: shop.ownerId
             }));
             setLocalNotifications(mappedNotifications);
         } catch (error) {
@@ -73,11 +64,8 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
 
   useEffect(() => { refreshNotifications(); }, []);
 
-  const filteredNotifications = localNotifications; // Mostriamo tutto quello che arriva da getNegozi
-
+  const filteredNotifications = localNotifications;
   const selectedNotification = filteredNotifications.find(n => n.id === selectedId);
-  
-  // --- VERIFICA ROBUSTA ---
   const isSelectedClaim = selectedNotification 
       ? !!(selectedNotification.pendingOwnerId || selectedNotification.proprietarioInAttesa)
       : false;
@@ -120,18 +108,18 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
 
   const handleReject = async (id: string, isClaim: boolean) => {
       const msg = isClaim 
-        ? "Vuoi rifiutare la richiesta? Il negozio resterà attivo ma senza proprietario." 
-        : "Vuoi CANCELLARE definitivamente questa segnalazione?";
+        ? "Vuoi rifiutare la richiesta? Il negozio resterà attivo, ma senza proprietario" 
+        : "Vuoi cancellare definitivamente questa segnalazione?";
 
       if(!window.confirm(msg)) return;
       
       try {
           if (isClaim) {
               await updateNegozio(id, { proprietarioInAttesa: null });
-              alert("Richiesta respinta. Il negozio è rimasto attivo.");
+              alert("Richiesta respinta, il negozio è rimasto attivo");
           } else {
               await deleteNegozio(id);
-              alert("Segnalazione cancellata.");
+              alert("Segnalazione cancellata");
           }
           setSelectedId(null);
           refreshNotifications();
@@ -140,7 +128,6 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8 h-[calc(100vh-64px)] flex flex-col md:flex-row gap-6">
-       {/* LISTA SINISTRA */}
        <div className={`w-full md:w-1/3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col ${selectedId ? 'hidden md:flex' : 'flex'}`}>
          <div className="p-4 border-b border-gray-100 flex justify-between items-center">
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2"><Bell className="w-5 h-5 text-green-600" /> Da Approvare</h2>
@@ -167,8 +154,6 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
             }
          </div>
       </div>
-
-      {/* DETTAGLIO DESTRA */}
       <div className={`w-full md:w-2/3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col ${!selectedId ? 'hidden md:flex' : 'flex'}`}>
          {selectedNotification ? (
             <div className="flex-1 overflow-y-auto p-6 md:p-10">
@@ -182,8 +167,6 @@ const Notifications: React.FC<NotificationsProps> = ({ userRole }) => {
                         <p className="text-sm text-gray-400 mt-1 font-mono">ID: {selectedNotification.id}</p>
                     </div>
                  </div>
-
-                 {/* BARRA ARANCIONE VISIBILE (Se è rivendicazione) */}
                  {isSelectedClaim && (
                      <div className="bg-orange-50 border border-orange-200 p-5 rounded-2xl mb-8 shadow-sm flex items-start gap-3">
                          <div className="p-2 bg-orange-100 rounded-full text-orange-600"><AlertTriangle className="w-6 h-6" /></div>

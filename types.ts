@@ -12,10 +12,10 @@ export enum ShopCategory {
 }
 
 export enum ShopStatus {
-  OPEN = 'OPEN', // Green
-  OPENING_SOON = 'OPENING_SOON', // Yellow
-  CLOSED = 'CLOSED', // Red
-  UNVERIFIED = 'UNVERIFIED' // Grey
+  OPEN = 'OPEN',
+  OPENING_SOON = 'OPENING_SOON',
+  CLOSED = 'CLOSED',
+  UNVERIFIED = 'UNVERIFIED'
 }
 
 export interface Coordinates {
@@ -39,15 +39,15 @@ export interface Shop {
   description: string,
   hours: string;
   rawHours?: any;
-  imageUrl?: string; // New field for popup header
+  imageUrl?: string;
   website?: string;
   googleMapsLink?: string; 
   iosMapsLink?: string;    
   sustainabilityScore: number; 
-  votes: Record<string, 'up' | 'down'>; // Maps userName -> vote type (one vote per user)
+  votes: Record<string, 'up' | 'down'>;
   reviews: Review[];
   isEcommerce?: boolean;
-  ownerId?: string; // RF11: Username of the associated seller
+  ownerId?: string;
   pendingOwnerId?: string;
 }
 
@@ -68,9 +68,9 @@ export interface Seller {
 }
 
 export enum NotificationType {
-  SYSTEM = 'SYSTEM', // Generic info
-  PROMO = 'PROMO',   // For Users: Offers
-  REPORT = 'REPORT'  // For Operators: New shops to verify
+  SYSTEM = 'SYSTEM',
+  PROMO = 'PROMO',
+  REPORT = 'REPORT'  
 }
 
 export interface Notification {
@@ -81,17 +81,15 @@ export interface Notification {
   fullDescription: string;
   date: string;
   read: boolean;
-  // Specific fields
-  imageUrl?: string; // For Promos
-  shopId?: string;   // For Reports (link to shop)
-  shopName?: string; // For Reports
-  licenseId?: string; // For Reports (Operator check)
-  reporterId?: string; // The username/ID of the user who submitted the report
-
-  pendingOwnerId?: string;      // <--- FONDAMENTALE
-  proprietarioInAttesa?: string; // <--- SICUREZZA EXTRA
-  category?: string;            // <--- Utile per il display
-  address?: string;             // <--- Utile per il display
+  imageUrl?: string; 
+  shopId?: string;  
+  shopName?: string; 
+  licenseId?: string; 
+  reporterId?: string; 
+  pendingOwnerId?: string;   
+  proprietarioInAttesa?: string;
+  category?: string;            
+  address?: string;           
   name?: string;
 }
 

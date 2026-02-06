@@ -41,31 +41,22 @@ const Profile: React.FC<ProfileProps> = ({
     const [activeTab, setActiveTab] = useState<"personal" | "seller">(
         "personal"
     );
-
-    // Profile Data
     const [username, setUsername] = useState("");
-
-    // Reset Password Form Data
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-
-    // UI Messages
     const [message, setMessage] = useState<{
         type: "success" | "error";
         text: string;
     } | null>(null);
-
-    // Seller Profile Data
-    const [sellerZones, setSellerZones] = useState<string[]>([]); // Changed to array
+    const [sellerZones, setSellerZones] = useState<string[]>([]);
     const [sellerBio, setSellerBio] = useState("");
-    const [sellerTags, setSellerTags] = useState(""); // Comma separated string
+    const [sellerTags, setSellerTags] = useState("");
     const [sellerLinks, setSellerLinks] = useState<
         { name: string; url: string }[]
     >([{ name: "", url: "" }]);
     const [isSellerActive, setIsSellerActive] = useState(false);
 
     useEffect(() => {
-        // Controlla se c'è uno stato passato dalla navigazione
         if (location.state && (location.state as any).initialTab === "seller") {
             setActiveTab("seller");
         }
@@ -74,8 +65,6 @@ const Profile: React.FC<ProfileProps> = ({
     useEffect(() => {
         if (currentUserName) {
             setUsername(currentUserName);
-
-            // Load existing seller data if any
             const existingSeller = sellers.find(
                 (s) => s.username === currentUserName
             );
@@ -93,7 +82,6 @@ const Profile: React.FC<ProfileProps> = ({
         }
     }, [currentUserName, sellers]);
 
-    // Handle Username Update
     const handleSaveUsername = (e: React.FormEvent) => {
         e.preventDefault();
         if (!username.trim()) {
@@ -110,27 +98,22 @@ const Profile: React.FC<ProfileProps> = ({
         });
     };
 
-    // Step 1: Request Password Reset (Send Email)
     const handleRequestPasswordReset = () => {
-        // Simulation of backend email trigger
         setTimeout(() => {
             setViewState("EMAIL_SENT");
             setMessage(null);
         }, 500);
     };
 
-    // Step 2: Simulate clicking the link in the email
     const handleSimulateEmailLinkClick = () => {
         setViewState("RESET_PASSWORD_FORM");
         setMessage(null);
     };
 
-    // Step 3: Save New Password
     const handleSaveNewPassword = (e: React.FormEvent) => {
         e.preventDefault();
         setMessage(null);
 
-        // Exception 1: Passwords do not match
         if (newPassword !== confirmPassword) {
             setMessage({
                 type: "error",
@@ -139,7 +122,6 @@ const Profile: React.FC<ProfileProps> = ({
             return;
         }
 
-        // Exception 2: Invalid password
         if (newPassword.length < 6) {
             setMessage({
                 type: "error",
@@ -148,14 +130,12 @@ const Profile: React.FC<ProfileProps> = ({
             return;
         }
 
-        // Success
         onUpdateProfile({ password: newPassword });
         setMessage({
             type: "success",
             text: "Password modificata con successo!",
         });
 
-        // Reset state and go back to main profile after delay
         setNewPassword("");
         setConfirmPassword("");
         setTimeout(() => {
@@ -163,8 +143,6 @@ const Profile: React.FC<ProfileProps> = ({
             setMessage(null);
         }, 2000);
     };
-
-    // --- SELLER PROFILE LOGIC ---
 
     const handleLinkChange = (
         index: number,
@@ -206,7 +184,6 @@ const Profile: React.FC<ProfileProps> = ({
             return;
         }
 
-        // Clean data
         const cleanedTags = sellerTags
             .split(",")
             .map((t) => t.trim())
@@ -546,7 +523,6 @@ const Profile: React.FC<ProfileProps> = ({
     return (
         <div className="max-w-3xl mx-auto p-4 md:p-8">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                {/* Header */}
                 <div className="bg-green-50 p-6 border-b border-green-100 flex items-center gap-4">
                     <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white shadow-md">
                         <User className="w-8 h-8" />
@@ -570,7 +546,6 @@ const Profile: React.FC<ProfileProps> = ({
                     </div>
                 </div>
 
-                {/* Tab Switcher */}
                 {viewState === "PROFILE_EDIT" && (
                     <div className="flex border-b border-gray-100">
                         <button
@@ -602,7 +577,6 @@ const Profile: React.FC<ProfileProps> = ({
                     </div>
                 )}
 
-                {/* Content */}
                 <div className="p-6 md:p-8">
                     {message && (
                         <div

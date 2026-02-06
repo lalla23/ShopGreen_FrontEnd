@@ -22,7 +22,7 @@ export const fetchSellers = async(Zone?: string, Categorie?: string): Promise<Se
         if(Categorie && Categorie!== 'Tutte') params.append('Categorie', Categorie);
 
         const url = new URL(API_URL);
-        url.search = params.toString(); //questo aggiunge all'url i paramentri di ricerca se ci sono
+        url.search = params.toString();
 
         const response = await fetch(url.toString(), {
             method: 'GET',

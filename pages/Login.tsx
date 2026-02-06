@@ -8,7 +8,6 @@ interface LoginProps {
   onLoginSuccess: (user: { role: UserRole; name: string }) => void;
 }
 
-// Add types for window.google
 declare global {
   interface Window {
     google: any;
@@ -17,31 +16,22 @@ declare global {
 
 const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
-  
-  // Login State
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  
-  // Register State
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regRole, setRegRole] = useState<UserRole>(UserRole.USER);
-
-  // UI States
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [registrationSuccess, setRegistrationSuccess] = useState(false); // New state for email verification
-  
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const navigate = useNavigate();
-
-  // Reset error when switching tabs
   useEffect(() => {
     setError('');
     setRegistrationSuccess(false);
   }, [activeTab]);
 
-  // Funzione per la decodifica del JWT
+ 
   const decodeJWT = (token: string) => {
     try {
       let base64Url = token.split(".")[1];
@@ -60,26 +50,21 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     }
   };
 
-  // Handle Google Callback
 const handleCredentialResponse = async (response: any) => {
     setIsLoading(true);
     setError('');
     
-    // --- ADD DEBUG LOGGING ---
     console.log("Google Response:", response); 
 
     try {
       let googleToken = response.credential;
       
-      // Safety check
       if (!googleToken) {
           throw new Error("Google did not return a credential token.");
       }
 
-      // Chiamiamo il servizio centralizzato
       const userData = await login({googleToken: googleToken}, true);
       
-      // Se arriviamo qui, il login è riuscito
       onLoginSuccess({
         role: userData.role,
         name: userData.name
@@ -93,21 +78,18 @@ const handleCredentialResponse = async (response: any) => {
     }
   };
 
-  // Initialize Google Button ONLY for Login tab
   useEffect(() => {
     if (activeTab === 'login') {
       const intervalId = setInterval(() => {
         if (window.google) {
           clearInterval(intervalId);
           try {
-            // Global init
             window.google.accounts.id.initialize({
               client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
               callback: handleCredentialResponse,
               auto_prompt: false
             });
 
-            // Render button only in the login container
             const btnContainer = document.getElementById("google-btn-login");
             
             if (btnContainer) {
@@ -174,7 +156,6 @@ const handleCredentialResponse = async (response: any) => {
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md bg-white rounded-[30px] shadow-xl p-8 border border-gray-100">
         
-        {/* Tabs Toggle */}
         {!registrationSuccess && (
           <div className="flex bg-gray-200 rounded-full p-1 mb-8 relative">
              <button
@@ -194,7 +175,6 @@ const handleCredentialResponse = async (response: any) => {
           </div>
         )}
 
-        {/* --- VIEW: SUCCESSFUL REGISTRATION (CHECK EMAIL) --- */}
         {registrationSuccess ? (
           <div className="flex flex-col items-center text-center animate-in zoom-in duration-300 py-6">
             <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
@@ -220,7 +200,6 @@ const handleCredentialResponse = async (response: any) => {
             </button>
           </div>
         ) : (
-          /* --- VIEW: FORMS --- */
           <>
             {activeTab === 'login' ? (
               <form onSubmit={handleLogin} className="space-y-5 animate-in fade-in duration-300">
@@ -275,7 +254,6 @@ const handleCredentialResponse = async (response: any) => {
                     </div>
                  </div>
 
-                 {/* bottone google:*/}
                   <div className="flex justify-center w-full">
                       <div id="google-btn-login"></div> 
                   </div>

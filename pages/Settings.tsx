@@ -19,19 +19,13 @@ const Settings: React.FC<SettingsProps> = ({
   const [activeDoc, setActiveDoc] = useState<'privacy' | 'guidelines' | null>(null);
 
 
-  const location = useLocation(); // Hook per leggere lo stato della navigazione
-
-  // Effetto per aprire automaticamente il documento se richiesto
+  const location = useLocation();
   useEffect(() => {
     if (location.state && location.state.openDoc) {
       setActiveDoc(location.state.openDoc);
-      // Pulisci lo stato per evitare riaperture indesiderate se necessario, 
-      // ma in questo contesto semplice va bene così.
-      window.history.replaceState({}, document.title); // Opzionale: pulisce lo stato
+      window.history.replaceState({}, document.title);
     }
   }, [location]);
-  // Documentation Content (RF7.4)
-  //GRAFICA:
   const renderDocContent = () => {
     if (!activeDoc) return null;
 

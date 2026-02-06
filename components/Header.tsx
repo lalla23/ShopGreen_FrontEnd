@@ -46,7 +46,6 @@ const Header: React.FC<HeaderProps> = ({ userRole, userName, onLoginClick, onLog
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-md z-[2000] sticky top-0 h-16 flex items-center justify-between px-4 md:px-8 transition-colors duration-300">
-      {/* Logo & Brand */}
       <Link to="/" className="flex items-center gap-2">
         <div className="bg-green-600 p-1.5 rounded-lg">
           <Leaf className="text-white w-6 h-6" />
@@ -54,7 +53,6 @@ const Header: React.FC<HeaderProps> = ({ userRole, userName, onLoginClick, onLog
         <span className="text-2xl font-bold text-green-900 dark:text-green-100 tracking-tight">ShopGreen</span>
       </Link>
 
-      {/* Navigation */}
       <nav className="hidden md:flex items-center gap-6">
         <Link to="/" className={getLinkClass('/')}>Home</Link>
         {userRole !== UserRole.ANONYMOUS && (
@@ -63,10 +61,8 @@ const Header: React.FC<HeaderProps> = ({ userRole, userName, onLoginClick, onLog
         <Link to="/ecommerce" className={getLinkClass('/ecommerce')}>E-Commerce</Link>
       </nav>
 
-      {/* Right Section: Notifications & Auth */}
       <div className="flex items-center gap-4">
         
-        {/* Notifications (Avvisi) - Direct Link to Page */}
         {userRole !== UserRole.ANONYMOUS && (
           <Link 
             to="/notifiche"
@@ -80,7 +76,6 @@ const Header: React.FC<HeaderProps> = ({ userRole, userName, onLoginClick, onLog
           </Link>
         )}
 
-        {/* Auth Buttons */}
         {userRole === UserRole.ANONYMOUS ? (
           <Link 
             to="/login"
@@ -106,7 +101,6 @@ const Header: React.FC<HeaderProps> = ({ userRole, userName, onLoginClick, onLog
                 </div>
              </button>
 
-             {/* User Dropdown Menu */}
              {showUserMenu && (
                <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 ring-1 ring-black ring-opacity-5">
                  <div className="py-2">
