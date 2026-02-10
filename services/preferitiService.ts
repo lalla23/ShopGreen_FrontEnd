@@ -1,6 +1,9 @@
 import { Shop, ShopStatus, ShopFavorite } from '../types';
 import { isNegozioAperto } from './negoziService';
-const API_URL = 'http://localhost:3000/api/preferiti/users';
+
+//const API_URL = 'http://localhost:3000/api/preferiti/users';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = `${BASE_URL}/api/preferiti/users`;
 
 export const mapPreferito = (dbItem: any): ShopFavorite => {
   let statusCalcolato = ShopStatus.UNVERIFIED; 
