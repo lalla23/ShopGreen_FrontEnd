@@ -5,7 +5,7 @@ import { UserRole } from '../types';
 import { User, ShoppingBag, ShieldCheck, Mail, CheckCircle, ArrowLeft } from 'lucide-react';
 
 interface LoginProps {
-  onLoginSuccess: (user: { role: UserRole; name: string }) => void;
+  onLoginSuccess: (user: { role: UserRole; name: string, id: string }) => void;
 }
 
 declare global {
@@ -67,7 +67,8 @@ const handleCredentialResponse = async (response: any) => {
       
       onLoginSuccess({
         role: userData.role,
-        name: userData.name
+        name: userData.name,
+        id: userData.id
       });
       
       navigate('/');
