@@ -21,7 +21,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regEmail, setRegEmail] = useState('');
-  const [regRole, setRegRole] = useState<UserRole>(UserRole.USER);
+  //const [regRole, setRegRole] = useState<UserRole>(UserRole.USER);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -144,7 +144,7 @@ const handleCredentialResponse = async (response: any) => {
 
     try {
       // Backend now sends an email, does not return a user object immediately
-      await register(regUsername, regPassword, regEmail, regRole);
+      await register(regUsername, regPassword, regEmail, UserRole.USER);
       setRegistrationSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Errore durante la registrazione.');
@@ -296,29 +296,6 @@ const handleCredentialResponse = async (response: any) => {
                   required
                 />
 
-                <div className="space-y-2 pt-2">
-                   <label className="text-sm font-bold text-gray-600 ml-2">Sono un:</label>
-                   <div className="grid grid-cols-3 gap-2">
-                     <button
-                       type="button"
-                       onClick={() => setRegRole(UserRole.USER)}
-                       className={`flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all ${regRole === UserRole.USER ? 'border-[#7dad57] bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
-                     >
-                       <User className="w-5 h-5 mb-1" />
-                       <span className="text-[10px] font-bold">Utente</span>
-                     </button>
-
-                     <button
-                       type="button"
-                       onClick={() => setRegRole(UserRole.OPERATOR)}
-                       className={`flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all ${regRole === UserRole.OPERATOR ? 'border-[#7dad57] bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
-                     >
-                       <ShieldCheck className="w-5 h-5 mb-1" />
-                       <span className="text-[10px] font-bold">Operatore</span>
-                     </button>
-                   </div>
-                </div>
-
                 <div className="pt-4 flex justify-center">
                    <button 
                      type="submit" 
@@ -327,8 +304,7 @@ const handleCredentialResponse = async (response: any) => {
                    >
                      {isLoading ? '...' : 'Registrati'}
                    </button>
-                 </div>
-                
+                 </div>           
               </form>
             )}
           </>

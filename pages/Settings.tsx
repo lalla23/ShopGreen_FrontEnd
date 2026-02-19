@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Globe, Moon, Sun, Bell, FileText, Shield, ChevronRight, Check } from 'lucide-react';
+import GuidelinesModal from '../components/GuidelinesModal';
 
 interface SettingsProps {
   language: 'it' | 'en' | 'de';
@@ -11,10 +12,10 @@ interface SettingsProps {
   setEmailNotifications: (enabled: boolean) => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ 
-  language, setLanguage, 
-  theme, setTheme, 
-  emailNotifications, setEmailNotifications 
+const Settings: React.FC<SettingsProps> = ({
+  language, setLanguage,
+  theme, setTheme,
+  emailNotifications, setEmailNotifications
 }) => {
   const [activeDoc, setActiveDoc] = useState<'privacy' | 'guidelines' | null>(null);
 
@@ -39,7 +40,7 @@ const Settings: React.FC<SettingsProps> = ({
               </h2>
               <button onClick={() => setActiveDoc(null)} className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">Chiudi</button>
             </div>
-            
+
             <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
               {activeDoc === 'privacy' ? (
                 <>
@@ -70,9 +71,9 @@ const Settings: React.FC<SettingsProps> = ({
                 </>
               )}
             </div>
-            
+
             <div className="mt-8 pt-4 border-t dark:border-gray-700 flex justify-end">
-              <button 
+              <button
                 onClick={() => setActiveDoc(null)}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
               >
@@ -87,7 +88,11 @@ const Settings: React.FC<SettingsProps> = ({
 
   return (
     <div className="max-w-2xl mx-auto p-4 md:p-8">
-      {renderDocContent()}
+      <GuidelinesModal
+        isOpen={!!activeDoc}
+        onClose={() => setActiveDoc(null)}
+        type={activeDoc || 'guidelines'}
+      />
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Impostazioni</h1>
@@ -95,7 +100,7 @@ const Settings: React.FC<SettingsProps> = ({
       </div>
 
       <div className="space-y-6">
-        
+
         <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -113,8 +118,8 @@ const Settings: React.FC<SettingsProps> = ({
                   key={lang.code}
                   onClick={() => setLanguage(lang.code as any)}
                   className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all
-                    ${language === lang.code 
-                      ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' 
+                    ${language === lang.code
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
                       : 'border-gray-100 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-300'}`}
                 >
                   <span className="text-2xl mb-2">{lang.flag}</span>
@@ -128,7 +133,7 @@ const Settings: React.FC<SettingsProps> = ({
         <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="p-4 md:p-6 border-b border-gray-100 dark:border-gray-700">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              {theme === 'light' ? <Sun className="w-5 h-5 text-orange-500" /> : <Moon className="w-5 h-5 text-purple-500" />} 
+              {theme === 'light' ? <Sun className="w-5 h-5 text-orange-500" /> : <Moon className="w-5 h-5 text-purple-500" />}
               Tema Visualizzazione
             </h2>
           </div>
@@ -138,13 +143,13 @@ const Settings: React.FC<SettingsProps> = ({
                 <p className="font-medium text-gray-900 dark:text-white">Modalità Scura</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Riduci l'affaticamento degli occhi in ambienti poco illuminati.</p>
               </div>
-              <button 
+              <button
                 onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
                   ${theme === 'dark' ? 'bg-green-600' : 'bg-gray-200'}`}
               >
                 <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform
-                  ${theme === 'dark' ? 'translate-x-7' : 'translate-x-1'}`} 
+                  ${theme === 'dark' ? 'translate-x-7' : 'translate-x-1'}`}
                 />
               </button>
             </div>
@@ -163,13 +168,13 @@ const Settings: React.FC<SettingsProps> = ({
                 <p className="font-medium text-gray-900 dark:text-white">Email di aggiornamento</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Ricevi novità su nuovi negozi e promozioni sostenibili.</p>
               </div>
-              <button 
+              <button
                 onClick={() => setEmailNotifications(!emailNotifications)}
                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
                   ${emailNotifications ? 'bg-green-600' : 'bg-gray-200'}`}
               >
                 <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform
-                  ${emailNotifications ? 'translate-x-7' : 'translate-x-1'}`} 
+                  ${emailNotifications ? 'translate-x-7' : 'translate-x-1'}`}
                 />
               </button>
             </div>
@@ -184,13 +189,13 @@ const Settings: React.FC<SettingsProps> = ({
             </h2>
           </div>
           <div className="divide-y divide-gray-100 dark:divide-gray-700">
-            <button 
+            <button
               onClick={() => setActiveDoc('privacy')}
               className="w-full flex items-center justify-between p-4 md:p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600 dark:text-blue-400">
-                   <Shield className="w-5 h-5" />
+                  <Shield className="w-5 h-5" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">Informativa sulla Privacy</p>
@@ -200,13 +205,13 @@ const Settings: React.FC<SettingsProps> = ({
               <ChevronRight className="w-5 h-5 text-gray-400" />
             </button>
 
-            <button 
-               onClick={() => setActiveDoc('guidelines')}
-               className="w-full flex items-center justify-between p-4 md:p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
+            <button
+              onClick={() => setActiveDoc('guidelines')}
+              className="w-full flex items-center justify-between p-4 md:p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg text-green-600 dark:text-green-400">
-                   <FileText className="w-5 h-5" />
+                  <FileText className="w-5 h-5" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">Linee Guida Sostenibilità</p>

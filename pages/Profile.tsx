@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { UserRole, Seller } from "../types";
-import { MOCK_ZONES } from "../constants";
+import { MOCK_ZONES, DB_CATEGORIES } from "../constants";
 import { useLocation } from "react-router-dom";
 import {
     User,
@@ -50,7 +50,7 @@ const Profile: React.FC<ProfileProps> = ({
     } | null>(null);
     const [sellerZones, setSellerZones] = useState<string[]>([]);
     const [sellerBio, setSellerBio] = useState("");
-    const [sellerTags, setSellerTags] = useState("");
+    const [sellerTags, setSellerTags] = useState<string[]>([]);
     const [sellerLinks, setSellerLinks] = useState<
         { name: string; url: string }[]
     >([{ name: "", url: "" }]);
@@ -72,7 +72,7 @@ const Profile: React.FC<ProfileProps> = ({
                 setIsSellerActive(true);
                 setSellerZones(existingSeller.zoneIds);
                 setSellerBio(existingSeller.bio || "");
-                setSellerTags(existingSeller.categories.join(", "));
+                setSellerTags(existingSeller.categories);
                 setSellerLinks(
                     existingSeller.platformLinks.length > 0
                         ? existingSeller.platformLinks
@@ -173,6 +173,16 @@ const Profile: React.FC<ProfileProps> = ({
         });
     };
 
+    const toggleCategory = (cat: string) => {
+        setSellerTags((prev) => {
+            if (prev.includes(cat)) {
+                return prev.filter((c) => c !== cat);
+            } else {
+                return [...prev, cat];
+            }
+        });
+    };
+
     const handleSaveSeller = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -184,10 +194,7 @@ const Profile: React.FC<ProfileProps> = ({
             return;
         }
 
-        const cleanedTags = sellerTags
-            .split(",")
-            .map((t) => t.trim())
-            .filter((t) => t.length > 0);
+        const cleanedTags = sellerTags;
         const cleanedLinks = sellerLinks.filter(
             (l) => l.name.trim() && l.url.trim()
         );
@@ -203,7 +210,7 @@ const Profile: React.FC<ProfileProps> = ({
         const newSellerProfile: Seller = {
             id: isSellerActive
                 ? sellers.find((s) => s.username === currentUserName)?.id ||
-                  "temp"
+                "temp"
                 : `s_${Date.now()}`,
             username: currentUserName || "Unknown",
             zoneIds: sellerZones,
@@ -249,11 +256,10 @@ const Profile: React.FC<ProfileProps> = ({
                                     type="button"
                                     onClick={() => toggleZone(z.id)}
                                     className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all duration-200 flex items-center gap-2
-                                ${
-                                    isSelected
-                                        ? "bg-green-600 text-white border-green-600 shadow-md transform scale-[1.02]"
-                                        : "bg-white text-gray-600 border-gray-200 hover:border-green-300"
-                                }
+                                ${isSelected
+                                            ? "bg-green-600 text-white border-green-600 shadow-md transform scale-[1.02]"
+                                            : "bg-white text-gray-600 border-gray-200 hover:border-green-300"
+                                        }
                             `}
                                 >
                                     {isSelected && (
@@ -286,18 +292,31 @@ const Profile: React.FC<ProfileProps> = ({
 
                 <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">
-                        Categorie (separate da virgola)
+                        Categorie (seleziona almeno una)
                     </label>
-                    <input
-                        type="text"
-                        value={sellerTags}
-                        onChange={(e) => setSellerTags(e.target.value)}
-                        placeholder="Es. Elettronica, Libri Scolastici, Vintage..."
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 outline-none"
-                    />
-                    <p className="text-xs text-gray-500">
-                        Questi tag aiuteranno gli altri a trovarti nei filtri.
-                    </p>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                        {DB_CATEGORIES.map((cat) => {
+                            const isSelected = sellerTags.includes(cat);
+                            return (
+                                <button
+                                    key={cat}
+                                    type="button"
+                                    onClick={() => toggleCategory(cat)}
+                                    className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all duration-200 flex items-center gap-2 capitalize
+                                ${isSelected
+                                            ? "bg-green-600 text-white border-green-600 shadow-md transform scale-[1.02]"
+                                            : "bg-white text-gray-600 border-gray-200 hover:border-green-300"
+                                        }
+                            `}
+                                >
+                                    {isSelected && (
+                                        <Check className="w-3 h-3" />
+                                    )}
+                                    {cat}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 <div className="space-y-3">
@@ -550,11 +569,10 @@ const Profile: React.FC<ProfileProps> = ({
                     <div className="flex border-b border-gray-100">
                         <button
                             onClick={() => setActiveTab("personal")}
-                            className={`flex-1 py-4 text-center font-bold text-sm transition-colors relative ${
-                                activeTab === "personal"
+                            className={`flex-1 py-4 text-center font-bold text-sm transition-colors relative ${activeTab === "personal"
                                     ? "text-green-700 bg-green-50/50"
                                     : "text-gray-500 hover:bg-gray-50"
-                            }`}
+                                }`}
                         >
                             Dati Personali
                             {activeTab === "personal" && (
@@ -563,11 +581,10 @@ const Profile: React.FC<ProfileProps> = ({
                         </button>
                         <button
                             onClick={() => setActiveTab("seller")}
-                            className={`flex-1 py-4 text-center font-bold text-sm transition-colors relative ${
-                                activeTab === "seller"
+                            className={`flex-1 py-4 text-center font-bold text-sm transition-colors relative ${activeTab === "seller"
                                     ? "text-green-700 bg-green-50/50"
                                     : "text-gray-500 hover:bg-gray-50"
-                            }`}
+                                }`}
                         >
                             E-commerce
                             {activeTab === "seller" && (
@@ -580,11 +597,10 @@ const Profile: React.FC<ProfileProps> = ({
                 <div className="p-6 md:p-8">
                     {message && (
                         <div
-                            className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${
-                                message.type === "success"
+                            className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${message.type === "success"
                                     ? "bg-green-50 text-green-700 border border-green-200"
                                     : "bg-red-50 text-red-700 border border-red-200"
-                            }`}
+                                }`}
                         >
                             {message.type === "success" ? (
                                 <CheckCircle className="w-5 h-5" />

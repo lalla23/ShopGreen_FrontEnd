@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { MapContainer, TileLayer, useMapEvents, useMap } from 'react-leaflet';
-import { Search, Plus, Loader2, AlertTriangle, RefreshCcw } from 'lucide-react'; 
+import { Search, Plus, Loader2, AlertTriangle, RefreshCcw } from 'lucide-react';
 import { Shop, ShopCategory, UserRole } from '../types';
 import { TRENTO_CENTER } from '../constants';
 import CustomMarker from '../components/CustomMarker';
@@ -11,10 +11,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { getNegozi, createNegozio, updateNegozio } from '../services/negoziService';
 import { sendFeedback } from '../services/feedbackService';
 
-const MapController: React.FC<{ 
-  center: { lat: number; lng: number }; 
+const MapController: React.FC<{
+  center: { lat: number; lng: number };
   onMove: (center: { lat: number; lng: number }) => void;
-  zoom?: number; 
+  zoom?: number;
 }> = ({ center, onMove, zoom }) => {
   const map = useMap();
   useEffect(() => {
@@ -27,21 +27,21 @@ const MapController: React.FC<{
 };
 
 const convertHoursToBackend = (rawHours: any[]) => {
-    const dayMap: { [key: string]: string } = { 'Lunedì': 'lunedi', 'Martedì': 'martedi', 'Mercoledì': 'mercoledi', 'Giovedì': 'giovedi', 'Venerdì': 'venerdi', 'Sabato': 'sabato', 'Domenica': 'domenica' };
-    const backendHours: any = {};
-    rawHours.forEach((item: any) => {
-        const dbKey = dayMap[item.day];
-        if (!dbKey) return;
-        if (item.isClosed) { backendHours[dbKey] = { chiuso: true, slot: [] }; } 
-        else {
-            const slots = [];
-            if (item.openMorning && item.closeMorning) slots.push({ apertura: item.openMorning, chiusura: item.closeMorning });
-            if (item.openAfternoon && item.closeAfternoon) slots.push({ apertura: item.openAfternoon, chiusura: item.closeAfternoon });
-            if (slots.length === 0) slots.push({ apertura: "09:00", chiusura: "18:00" });
-            backendHours[dbKey] = { chiuso: false, slot: slots };
-        }
-    });
-    return backendHours;
+  const dayMap: { [key: string]: string } = { 'Lunedì': 'lunedi', 'Martedì': 'martedi', 'Mercoledì': 'mercoledi', 'Giovedì': 'giovedi', 'Venerdì': 'venerdi', 'Sabato': 'sabato', 'Domenica': 'domenica' };
+  const backendHours: any = {};
+  rawHours.forEach((item: any) => {
+    const dbKey = dayMap[item.day];
+    if (!dbKey) return;
+    if (item.isClosed) { backendHours[dbKey] = { chiuso: true, slot: [] }; }
+    else {
+      const slots = [];
+      if (item.openMorning && item.closeMorning) slots.push({ apertura: item.openMorning, chiusura: item.closeMorning });
+      if (item.openAfternoon && item.closeAfternoon) slots.push({ apertura: item.openAfternoon, chiusura: item.closeAfternoon });
+      if (slots.length === 0) slots.push({ apertura: "09:00", chiusura: "18:00" });
+      backendHours[dbKey] = { chiuso: false, slot: slots };
+    }
+  });
+  return backendHours;
 };
 
 const MapInvalidator = () => {
@@ -54,7 +54,7 @@ interface HomeProps {
   userRole: UserRole;
   favorites: string[];
   toggleFavorite: (id: string) => void;
-  userName?: string | null; 
+  userName?: string | null;
 }
 
 type FilterType = ShopCategory | 'Tutte';
@@ -62,16 +62,16 @@ type FilterType = ShopCategory | 'Tutte';
 const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userName }) => {
   const [activeCategory, setActiveCategory] = useState<FilterType>('Tutte');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [mapCenter, setMapCenter] = useState(TRENTO_CENTER);
   const [mapZoom, setMapZoom] = useState(14);
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [shops, setShops] = useState<Shop[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [isAddModalOpen, setAddModalOpen] = useState(false);
-  const [addModalInitialData, setAddModalInitialData] = useState<{name?: string, ownerId?: string} | undefined>(undefined);
+  const [addModalInitialData, setAddModalInitialData] = useState<{ name?: string, ownerId?: string } | undefined>(undefined);
   const [editingShop, setEditingShop] = useState<Shop | null>(null);
 
   const [forceOpenId, setForceOpenId] = useState<string | null>(null);
@@ -81,10 +81,10 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
   const navigate = useNavigate();
 
   useEffect(() => {
-      const storedUserId = localStorage.getItem('userId');
-      const storedRole = localStorage.getItem('role');        
-      if (storedUserId && storedRole !== 'anonimo') setCurrentUserId(storedUserId);
-      else setCurrentUserId(null);
+    const storedUserId = localStorage.getItem('userId');
+    const storedRole = localStorage.getItem('role');
+    if (storedUserId && storedRole !== 'anonimo') setCurrentUserId(storedUserId);
+    else setCurrentUserId(null);
   }, []);
 
   const fetchShops = async () => {
@@ -103,16 +103,16 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
 
   useEffect(() => {
     if (location.state) {
-        if (location.state.focusShopId && location.state.center) {
-            const { focusShopId, center } = location.state;
-            setMapCenter(center); setMapZoom(16); setForceOpenId(focusShopId);
-            navigate(location.pathname, { replace: true, state: {} });
-        } else if (location.state.action === 'create_shop_from_report') {
-            const { data } = location.state;
-            setAddModalInitialData({ name: data.name, ownerId: data.ownerId });
-            setAddModalOpen(true);
-            navigate(location.pathname, { replace: true, state: {} });
-        }
+      if (location.state.focusShopId && location.state.center) {
+        const { focusShopId, center } = location.state;
+        setMapCenter(center); setMapZoom(16); setForceOpenId(focusShopId);
+        navigate(location.pathname, { replace: true, state: {} });
+      } else if (location.state.action === 'create_shop_from_report') {
+        const { data } = location.state;
+        setAddModalInitialData({ name: data.name, ownerId: data.ownerId });
+        setAddModalOpen(true);
+        navigate(location.pathname, { replace: true, state: {} });
+      }
     }
   }, [location, navigate]);
 
@@ -125,36 +125,36 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
       const backendPayload = {
         nome: formData.name,
         coordinate: [formData.coordinates.lat, formData.coordinates.lng],
-        categoria: formData.categories && formData.categories.length > 0 ? formData.categories : ["altro"], 
-        licenzaOppureFoto: formData.imageUrl || "https://placehold.co/400", 
+        categoria: formData.categories && formData.categories.length > 0 ? formData.categories : ["altro"],
+        licenzaOppureFoto: formData.imageUrl || "https://placehold.co/400",
         linkSito: formData.website,
         orari: orariBackend,
         proprietario: formData.ownerId
       };
 
-      if (formData.isExistingUpdate === true && formData.id) { await updateNegozio(formData.id, backendPayload); alert("Richiesta di rivendicazione inviata con successo!"); } 
+      if (formData.isExistingUpdate === true && formData.id) { await updateNegozio(formData.id, backendPayload); alert("Richiesta di rivendicazione inviata con successo!"); }
       else { await createNegozio(backendPayload); alert("Nuova attività segnalata con successo!"); }
-      
+
       await fetchShops(); setAddModalOpen(false); setAddModalInitialData(undefined);
     } catch (error: any) { console.error(error); alert("Errore durante la creazione: " + error.message); }
   };
 
   const handleUpdateShop = async (updatedShop: Shop) => {
-      try {
-        let orariBackend;
-        if (updatedShop.rawHours) orariBackend = convertHoursToBackend(updatedShop.rawHours);
-        const backendPayload = {
-            nome: updatedShop.name, licenzaOppureFoto: updatedShop.imageUrl, linkSito: updatedShop.website, categoria: updatedShop.categories, maps: updatedShop.googleMapsLink, mappe: updatedShop.iosMapsLink, coordinate: [updatedShop.coordinates.lat, updatedShop.coordinates.lng],
-            ...(orariBackend && { orari: orariBackend }), ...(updatedShop.ownerId && { proprietario: updatedShop.ownerId })
-        };
-        await updateNegozio(updatedShop.id, backendPayload); await fetchShops(); setEditingShop(null); alert("Negozio aggiornato con successo!");
-      } catch (error: any) { alert("Errore modifica: " + error.message); }
+    try {
+      let orariBackend;
+      if (updatedShop.rawHours) orariBackend = convertHoursToBackend(updatedShop.rawHours);
+      const backendPayload = {
+        nome: updatedShop.name, licenzaOppureFoto: updatedShop.imageUrl, linkSito: updatedShop.website, categoria: updatedShop.categories, maps: updatedShop.googleMapsLink, mappe: updatedShop.iosMapsLink, coordinate: [updatedShop.coordinates.lat, updatedShop.coordinates.lng],
+        ...(orariBackend && { orari: orariBackend }), ...(updatedShop.ownerId && { proprietario: updatedShop.ownerId })
+      };
+      await updateNegozio(updatedShop.id, backendPayload); await fetchShops(); setEditingShop(null); alert("Negozio aggiornato con successo!");
+    } catch (error: any) { alert("Errore modifica: " + error.message); }
   };
 
   const handleVerify = async (id: string, isPositive: boolean) => {
-      if (!currentUserId) return;
-      try { await sendFeedback(id, isPositive); await fetchShops(); alert(isPositive ? "Voto positivo inviato! " : "Segnalazione negativa inviata! "); } 
-      catch (error: any) { alert(error.message); }
+    if (!currentUserId) return;
+    try { await sendFeedback(id, isPositive); }
+    catch (error: any) { console.error(error.message); }
   };
 
   const handleAddReview = (id: string, comment: string) => { alert("Le recensioni testuali saranno disponibili a breve! Per ora usa i voti Sostenibile/Non Sostenibile."); };
@@ -163,7 +163,7 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
     return shops.filter(shop => { const matchesSearch = shop.name.toLowerCase().includes(searchQuery.toLowerCase()); return matchesSearch; });
   }, [shops, searchQuery]);
 
-  const categories = [ { label: 'Tutte', value: 'Tutte' as FilterType }, { label: 'Vestiti', value: ShopCategory.CLOTHING }, { label: 'Alimenti', value: ShopCategory.FOOD }, { label: 'Cura casa/persona', value: ShopCategory.HOME_CARE }, ];
+  const categories = [{ label: 'Tutte', value: 'Tutte' as FilterType }, { label: 'Vestiti', value: ShopCategory.CLOTHING }, { label: 'Alimenti', value: ShopCategory.FOOD }, { label: 'Cura casa/persona', value: ShopCategory.HOME_CARE },];
 
   const handleMapMove = useCallback((center: { lat: number; lng: number }) => { }, []);
 
@@ -207,9 +207,9 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
         <MapController center={mapCenter} zoom={mapZoom} onMove={handleMapMove} />
 
         {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center z-[1000] bg-black/20 pointer-events-none">
-                <div className="bg-white p-4 rounded-full shadow-xl animate-spin"><Loader2 className="w-8 h-8 text-green-600" /></div>
-            </div>
+          <div className="absolute inset-0 flex items-center justify-center z-[1000] bg-black/20 pointer-events-none">
+            <div className="bg-white p-4 rounded-full shadow-xl animate-spin"><Loader2 className="w-8 h-8 text-green-600" /></div>
+          </div>
         )}
 
         {filteredShops.map(shop => (
@@ -219,7 +219,7 @@ const Home: React.FC<HomeProps> = ({ userRole, favorites, toggleFavorite, userNa
 
       {userRole !== UserRole.ANONYMOUS && (
         <div className="absolute bottom-24 md:bottom-6 right-6 z-[400] pointer-events-auto">
-          <button 
+          <button
             onClick={() => { setAddModalInitialData(undefined); setAddModalOpen(true); }}
             className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white p-4 md:px-5 md:py-3 rounded-full shadow-xl font-bold transition-all hover:scale-105"
           >
